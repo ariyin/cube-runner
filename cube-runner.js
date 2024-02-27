@@ -344,7 +344,7 @@ export class CubeRunner extends Base_Scene {
 
     this.horizontal_position = 0
 
-    this.speed = 10
+    this.speed = 12
   }
 
   make_control_panel() {
