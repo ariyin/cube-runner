@@ -345,6 +345,9 @@ export class CubeRunner extends Base_Scene {
     this.horizontal_position = 0
 
     this.speed = 12
+
+    this.current_score = 0;
+    this.high_score = 0;
   }
 
   make_control_panel() {
@@ -406,5 +409,50 @@ export class CubeRunner extends Base_Scene {
       model_transform,
       this.materials.plastic.override({ color: blue })
     )
+
+    // Update and render score
+    this.update_score(program_state.animation_delta_time/10);
+    this.render_score(context, program_state);
   }
+
+  update_score(delta_time) {
+    // Update the current score, typically based on the delta_time
+    this.current_score += delta_time; // for example, increment score by time
+    
+    // Check and update high score if current score is greater
+    if (this.current_score > this.high_score) {
+      this.high_score = this.current_score;
+    }
+  }
+
+  render_score(context, program_state) {
+    // Ensure the DOM element for the score exists
+    if (!this.score_container) {
+      this.score_container = document.createElement("div");
+      this.score_container.style.position = "absolute";
+      this.score_container.style.right = "80px"; 
+      this.score_container.style.top = "10px";
+      this.score_container.style.color = "white";
+      this.score_container.style.fontSize = "20px";
+      this.score_container.style.textAlign = "right";
+      this.score_container.style.width = "100%"; 
+      this.score_container.style.boxSizing = "border-box";
+      this.score_container.style.paddingRight = "20px"; 
+      document.body.appendChild(this.score_container);
+
+      this.high_score_element = document.createElement("div");
+      this.high_score_element.style.width = "100%";
+      this.score_container.appendChild(this.high_score_element);
+
+      this.current_score_element = document.createElement("div");
+      this.current_score_element.style.width = "100%";
+      this.score_container.appendChild(this.current_score_element);
+    }
+
+    // Update the score and high score displays
+    this.high_score_element.textContent = `High Score: ${Math.floor(this.high_score)}`;
+    this.current_score_element.textContent = `Score: ${Math.floor(this.current_score)}`;
+  }
+
+
 }
