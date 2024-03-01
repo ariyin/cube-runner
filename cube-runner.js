@@ -480,39 +480,33 @@ export class CubeRunner extends Base_Scene {
   render_score() {
     // Ensure the DOM element for the score exists
     if (!this.score_container) {
-      this.score_container = document.createElement('div')
-      // TODO: Fix positioning so it's within the canvas div
-      this.score_container.style.position = 'absolute'
-      this.score_container.style.right = '23%'
-      this.score_container.style.top = '5%'
-      this.score_container.style.transform =
-        'translate(-50%, -50%)'
-      this.score_container.style.color = 'white'
-      this.score_container.style.fontSize = '20px'
-      this.score_container.style.textAlign = 'right'
+      this.score_container = document.createElement('div');
+      // Fix positioning so it's consistently in the upper right of the canvas
+      this.score_container.style.position = 'absolute';
+      this.score_container.style.right = '5px';  // Keep score 5px from the right edge of the canvas
+      this.score_container.style.top = '5px';    // Keep score 5px from the top edge of the canvas
+      this.score_container.style.color = 'white';
+      this.score_container.style.fontSize = '20px';
+      this.score_container.style.textAlign = 'right';
+      this.score_container.style.zIndex = '1000';  // Make sure it's on top
       // TEMP FOR DEBUGGING
-      this.score_container.style.backgroundColor = 'black'
-      document.body.appendChild(this.score_container)
+      this.score_container.style.backgroundColor = 'black';
 
-      this.high_score_element =
-        document.createElement('div')
-      this.score_container.appendChild(
-        this.high_score_element
-      )
+      // Append the score container to the WebGL canvas created by Canvas_Widget
+      const canvasElement = document.querySelector("#main-canvas"); // Select the main canvas element
+      canvasElement.style.position = 'relative'; // Ensure the canvas is positioned to anchor the score
+      canvasElement.appendChild(this.score_container);
 
-      this.current_score_element =
-        document.createElement('div')
-      this.score_container.appendChild(
-        this.current_score_element
-      )
+      this.high_score_element = document.createElement('div');
+      this.score_container.appendChild(this.high_score_element);
+
+      this.current_score_element = document.createElement('div');
+      this.score_container.appendChild(this.current_score_element);
     }
 
     // Update the score and high score displays
-    this.high_score_element.textContent = `High Score: ${Math.floor(
-      this.high_score
-    )}`
-    this.current_score_element.textContent = `Score: ${Math.floor(
-      this.current_score
-    )}`
+    this.high_score_element.textContent = `High Score: ${Math.floor(this.high_score)}`;
+    this.current_score_element.textContent = `Score: ${Math.floor(this.current_score)}`;
   }
+
 }
