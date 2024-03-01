@@ -255,6 +255,20 @@ export class CubeRunner extends Base_Scene {
     this.tilt_acceleration = 0.005
     this.max_tilt_speed = 0.1
     this.max_tilt_angle = Math.PI / 20
+
+    // Additional properties for managing cubes
+    this.spawnedCubes = []; // Store the positions and IDs of spawned cubes
+    this.spawnRate = 500; // Time in milliseconds between cube spawns
+    this.lastSpawnTime = 0; // Last spawn time
+    this.cubeSpeed = 25; // Speed at which cubes move towards the player
+  }
+
+  // Method to spawn cubes randomly
+  spawnCube() {
+    const positionX = Math.random() * 20 - 10; // Random position in X axis, adjust range as needed
+    const positionZ = -50; // Start far away on the Z axis
+    const cubeID = Math.random().toString(36).substr(2, 9); // Generate a unique ID for each cube
+    this.spawnedCubes.push({ positionX, positionZ, cubeID });
   }
 
   make_control_panel() {
@@ -340,6 +354,22 @@ export class CubeRunner extends Base_Scene {
         dt = 0
       }
 
+      // Cube spawning logic
+      const now = performance.now();
+      if (now - this.lastSpawnTime > this.spawnRate) {
+        this.spawnCube();
+        this.lastSpawnTime = now;
+      }
+
+      // Move and draw spawned cubes
+      this.spawnedCubes.forEach(cube => {
+        cube.positionZ += this.cubeSpeed * program_state.animation_delta_time / 1000; // Move cube towards player
+        if (cube.positionZ < 20) { // Check if cube is within visible range before drawing
+          const cubeTransform = Mat4.translation(cube.positionX, 0, cube.positionZ);
+          this.shapes.cube.draw(context, program_state, cubeTransform, this.materials.plastic.override({ color: hex_color('#f1a593') }));
+        }
+      });
+
       // Adjust tilt angle based on user input
       // TODO: exponentiate the tilt speed
       if (this.left_key_pressed) {
@@ -414,16 +444,16 @@ export class CubeRunner extends Base_Scene {
       )
 
       //background cubes for demo
-      for (let i = 0; i < 10; i++) {
-        this.shapes.cube.draw(
-          context,
-          program_state,
-          Mat4.translation((i - 5) * 5, 0, -10),
-          this.materials.plastic.override({
-            color: hex_color('#f1a593'),
-          })
-        )
-      }
+      // for (let i = 0; i < 10; i++) {
+      //   this.shapes.cube.draw(
+      //     context,
+      //     program_state,
+      //     Mat4.translation((i - 5) * 5, 0, -10),
+      //     this.materials.plastic.override({d
+      //       color: hex_color('#f1a593'),
+      //     })
+      //   )
+      // }
 
       // Update and render score
       if (!this.is_paused) {
@@ -434,6 +464,8 @@ export class CubeRunner extends Base_Scene {
       this.render_score()
     }
   }
+
+
 
   update_score(delta_time) {
     // Update the current score, typically based on the delta_time
