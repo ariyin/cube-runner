@@ -365,12 +365,23 @@ export class CubeRunner extends Base_Scene {
         }
       }
 
-      // Update camera orientation based on tilt angle
-      let camera_position = Mat4.translation(
+      // cap the maximum tilt angle
+      this.tilt_angle = Math.max(
+        Math.min(this.tilt_angle, Math.PI / 72),
+        -Math.PI / 72
+      )
+
+      let cube_transform = Mat4.translation(
+        this.horizontal_position,
         0,
-        -5,
-        -30
-      ).times(Mat4.rotation(this.tilt_angle, 0, 0, 1))
+        0
+      )
+
+      let camera_position = Mat4.inverse(
+        Mat4.translation(0, 5, 30)
+          .times(Mat4.rotation(-this.tilt_angle, 0, 0, 1))
+          .times(cube_transform)
+      )
 
       program_state.set_camera(camera_position)
       program_state.projection_transform = Mat4.perspective(
@@ -382,14 +393,8 @@ export class CubeRunner extends Base_Scene {
 
       // Transformation of floor and user
       let floor_transform = Mat4.identity().times(
-        Mat4.translation(0, -5, 0)
+        Mat4.translation(0, -1, 0)
       )
-      let model_transform = Mat4.translation(
-        this.horizontal_position,
-        0,
-        10
-      )
-
       // Draw floor and user
       this.shapes.floor.draw(
         context,
@@ -402,16 +407,30 @@ export class CubeRunner extends Base_Scene {
       this.shapes.cube.draw(
         context,
         program_state,
-        model_transform,
+        cube_transform,
         this.materials.plastic.override({
           color: hex_color('#1a9ffa'),
         })
       )
 
+      //background cubes for demo
+      for (let i = 0; i < 10; i++) {
+        this.shapes.cube.draw(
+          context,
+          program_state,
+          Mat4.translation((i - 5) * 5, 0, -10),
+          this.materials.plastic.override({
+            color: hex_color('#f1a593'),
+          })
+        )
+      }
+
       // Update and render score
-      this.update_score(
-        program_state.animation_delta_time / 10
-      )
+      if (!this.is_paused) {
+        this.update_score(
+          program_state.animation_delta_time / 10
+        )
+      }
       this.render_score()
     }
   }
