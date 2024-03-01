@@ -257,18 +257,20 @@ export class CubeRunner extends Base_Scene {
     this.max_tilt_angle = Math.PI / 20
 
     // Additional properties for managing cubes
-    this.spawnedCubes = []; // Store the positions and IDs of spawned cubes
-    this.spawnRate = 500; // Time in milliseconds between cube spawns
-    this.lastSpawnTime = 0; // Last spawn time
-    this.cubeSpeed = 25; // Speed at which cubes move towards the player
+    this.spawnedCubes = [] // Store the positions and IDs of spawned cubes
+    this.spawnRate = 500 // Time in milliseconds between cube spawns
+    this.lastSpawnTime = 0 // Last spawn time
+    this.cubeSpeed = 25 // Speed at which cubes move towards the player
+
+    this.current_time = performance.now()
   }
 
   // Method to spawn cubes randomly
   spawnCube() {
-    const positionX = Math.random() * 20 - 10; // Random position in X axis, adjust range as needed
-    const positionZ = -50; // Start far away on the Z axis
-    const cubeID = Math.random().toString(36).substr(2, 9); // Generate a unique ID for each cube
-    this.spawnedCubes.push({ positionX, positionZ, cubeID });
+    const positionX = Math.random() * 20 - 10 // Random position in X axis, adjust range as needed
+    const positionZ = -50 // Start far away on the Z axis
+    const cubeID = Math.random().toString(36).substr(2, 9) // Generate a unique ID for each cube
+    this.spawnedCubes.push({ positionX, positionZ, cubeID })
   }
 
   make_control_panel() {
@@ -352,23 +354,45 @@ export class CubeRunner extends Base_Scene {
 
       if (this.is_paused) {
         dt = 0
+      } else {
+        this.current_time = performance.now()
       }
 
       // Cube spawning logic
-      const now = performance.now();
+      const now = this.current_time
       if (now - this.lastSpawnTime > this.spawnRate) {
-        this.spawnCube();
-        this.lastSpawnTime = now;
+        this.spawnCube()
+        this.lastSpawnTime = now
       }
 
       // Move and draw spawned cubes
-      this.spawnedCubes.forEach(cube => {
-        cube.positionZ += this.cubeSpeed * program_state.animation_delta_time / 1000; // Move cube towards player
-        if (cube.positionZ < 20) { // Check if cube is within visible range before drawing
-          const cubeTransform = Mat4.translation(cube.positionX, 0, cube.positionZ);
-          this.shapes.cube.draw(context, program_state, cubeTransform, this.materials.plastic.override({ color: hex_color('#f1a593') }));
+      if (!this.is_paused) {
+        this.spawnedCubes.forEach((cube) => {
+          cube.positionZ +=
+            (this.cubeSpeed *
+              program_state.animation_delta_time) /
+            1000 // Move cube towards player
+        })
+      }
+
+      this.spawnedCubes.forEach((cube) => {
+        if (cube.positionZ < 20) {
+          // Check if cube is within visible range before drawing
+          const cubeTransform = Mat4.translation(
+            cube.positionX,
+            0,
+            cube.positionZ
+          )
+          this.shapes.cube.draw(
+            context,
+            program_state,
+            cubeTransform,
+            this.materials.plastic.override({
+              color: hex_color('#f1a593'),
+            })
+          )
         }
-      });
+      })
 
       // Adjust tilt angle based on user input
       // TODO: exponentiate the tilt speed
@@ -465,8 +489,6 @@ export class CubeRunner extends Base_Scene {
     }
   }
 
-
-
   update_score(delta_time) {
     // Update the current score, typically based on the delta_time
     this.current_score += delta_time // for example, increment score by time
@@ -480,33 +502,43 @@ export class CubeRunner extends Base_Scene {
   render_score() {
     // Ensure the DOM element for the score exists
     if (!this.score_container) {
-      this.score_container = document.createElement('div');
+      this.score_container = document.createElement('div')
       // Fix positioning so it's consistently in the upper right of the canvas
-      this.score_container.style.position = 'absolute';
-      this.score_container.style.right = '5px';  // Keep score 5px from the right edge of the canvas
-      this.score_container.style.top = '5px';    // Keep score 5px from the top edge of the canvas
-      this.score_container.style.color = 'white';
-      this.score_container.style.fontSize = '20px';
-      this.score_container.style.textAlign = 'right';
-      this.score_container.style.zIndex = '1000';  // Make sure it's on top
+      this.score_container.style.position = 'absolute'
+      this.score_container.style.right = '5px' // Keep score 5px from the right edge of the canvas
+      this.score_container.style.top = '5px' // Keep score 5px from the top edge of the canvas
+      this.score_container.style.color = 'white'
+      this.score_container.style.fontSize = '20px'
+      this.score_container.style.textAlign = 'right'
+      this.score_container.style.zIndex = '1000' // Make sure it's on top
       // TEMP FOR DEBUGGING
-      this.score_container.style.backgroundColor = 'black';
+      this.score_container.style.backgroundColor = 'black'
 
       // Append the score container to the WebGL canvas created by Canvas_Widget
-      const canvasElement = document.querySelector("#main-canvas"); // Select the main canvas element
-      canvasElement.style.position = 'relative'; // Ensure the canvas is positioned to anchor the score
-      canvasElement.appendChild(this.score_container);
+      const canvasElement =
+        document.querySelector('#main-canvas') // Select the main canvas element
+      canvasElement.style.position = 'relative' // Ensure the canvas is positioned to anchor the score
+      canvasElement.appendChild(this.score_container)
 
-      this.high_score_element = document.createElement('div');
-      this.score_container.appendChild(this.high_score_element);
+      this.high_score_element =
+        document.createElement('div')
+      this.score_container.appendChild(
+        this.high_score_element
+      )
 
-      this.current_score_element = document.createElement('div');
-      this.score_container.appendChild(this.current_score_element);
+      this.current_score_element =
+        document.createElement('div')
+      this.score_container.appendChild(
+        this.current_score_element
+      )
     }
 
     // Update the score and high score displays
-    this.high_score_element.textContent = `High Score: ${Math.floor(this.high_score)}`;
-    this.current_score_element.textContent = `Score: ${Math.floor(this.current_score)}`;
+    this.high_score_element.textContent = `High Score: ${Math.floor(
+      this.high_score
+    )}`
+    this.current_score_element.textContent = `Score: ${Math.floor(
+      this.current_score
+    )}`
   }
-
 }
