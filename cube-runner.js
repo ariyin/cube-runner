@@ -257,6 +257,7 @@ export class CubeRunner extends Base_Scene {
     this.max_tilt_angle = Math.PI / 20
 
     // Additional properties for managing cubes
+    this.cubeSize = 4; // Sets cube size of player
     this.spawnedCubes = [] // Store the positions and IDs of spawned cubes
     this.spawnRate = 500 // Time in milliseconds between cube spawns
     this.lastSpawnTime = 0 // Last spawn time
@@ -271,6 +272,13 @@ export class CubeRunner extends Base_Scene {
     const positionZ = -50 // Start far away on the Z axis
     const cubeID = Math.random().toString(36).substr(2, 9) // Generate a unique ID for each cube
     this.spawnedCubes.push({ positionX, positionZ, cubeID })
+  }
+  // Method to see if player is colliding
+  isColliding(playerPos, cubePos, cubeSize) {
+    const distanceX = Math.abs(playerPos.x - cubePos.x);
+    const distanceZ = Math.abs(playerPos.z - cubePos.z);
+    // Since player does not move in z and y, we only check for x (left/right) and z (forward/backward)
+    return distanceX < cubeSize && distanceZ < cubeSize;
   }
 
   make_control_panel() {
@@ -374,6 +382,18 @@ export class CubeRunner extends Base_Scene {
             1000 // Move cube towards player
         })
       }
+
+      this.spawnedCubes.forEach((cube, index) => {
+        let playerPos = { x: this.horizontal_position, z: 0 }; // Z is always 0 since we're assuming it's a fixed lane
+        let cubePos = { x: cube.positionX, z: cube.positionZ };
+
+        if (this.isColliding(playerPos, cubePos, this.cubeSize / 2)) { // Assuming the cubeSize refers to the full side length; we want radius
+          this.started = false; // Stop the game
+          // Optionally, perform any cleanup or display a game over message
+          alert("Game Over");
+          return; // Exit the loop to avoid further processing
+        }
+      });
 
       this.spawnedCubes.forEach((cube) => {
         if (cube.positionZ < 20) {
