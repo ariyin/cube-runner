@@ -241,6 +241,7 @@ export class CubeRunner extends Base_Scene {
     this.current_score = 0
     this.high_score = 0
     this.is_paused = false
+    this.play_music = true
 
     // User
     this.outline = false
@@ -273,6 +274,7 @@ export class CubeRunner extends Base_Scene {
     const cubeID = Math.random().toString(36).substr(2, 9) // Generate a unique ID for each cube
     this.spawnedCubes.push({ positionX, positionZ, cubeID })
   }
+
   // Method to see if player is colliding
   isColliding(playerPos, cubePos, cubeSize) {
     const distanceX = Math.abs(playerPos.x - cubePos.x);
@@ -304,8 +306,6 @@ export class CubeRunner extends Base_Scene {
     // Optionally, refocus or click to start
   }
 
-
-
   showGameOverScreen() {
     if (!this.game_over_container) {
       this.game_over_container = document.createElement('div');
@@ -334,14 +334,7 @@ export class CubeRunner extends Base_Scene {
     this.game_over_container.style.display = 'block'; // Make sure it's visible
   }
 
-
-
   make_control_panel() {
-    // this.key_triggered_button("Outline", ["o"], () => {
-    //     this.outline = !this.outline;
-    // });
-
-    // TODO: Shouldn't be the cube/user moving, but the scene moving
     this.key_triggered_button(
       'Left',
       ['a'],
@@ -368,10 +361,30 @@ export class CubeRunner extends Base_Scene {
     this.key_triggered_button('Pause', ['p'], () => {
       this.is_paused = !this.is_paused
     })
+
+    this.key_triggered_button('Play/Pause Music', ['m'], () => {
+      this.play_music = !this.play_music
+    })
   }
 
   display(context, program_state) {
     super.display(context, program_state)
+
+    // Background audio
+    if (!this.music) {
+      this.music = document.createElement('audio');
+      this.music.id = 'background-music';
+      this.music.autoplay = true;
+      this.music.loop = true;
+      this.music.src = 'backinshape.mp4';
+      document.body.appendChild(this.music);
+    }
+
+    if (this.play_music) {
+      this.music.play();
+    } else {
+      this.music.pause();
+    }
 
     if (!this.started) {
       // Starting screen
@@ -541,18 +554,6 @@ export class CubeRunner extends Base_Scene {
           color: hex_color('#1a9ffa'),
         })
       )
-
-      //background cubes for demo
-      // for (let i = 0; i < 10; i++) {
-      //   this.shapes.cube.draw(
-      //     context,
-      //     program_state,
-      //     Mat4.translation((i - 5) * 5, 0, -10),
-      //     this.materials.plastic.override({d
-      //       color: hex_color('#f1a593'),
-      //     })
-      //   )
-      // }
 
       // Update and render score
       if (!this.is_paused) {
