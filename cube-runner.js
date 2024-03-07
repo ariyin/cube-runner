@@ -281,6 +281,61 @@ export class CubeRunner extends Base_Scene {
     return distanceX < cubeSize && distanceZ < cubeSize;
   }
 
+  resetGame() {
+    // Reset game state variables
+    this.started = true; // Allow the game to run
+    this.current_score = 0; // Reset score
+    this.high_score = this.high_score; // Keep high score, or reset if you prefer
+    this.spawnedCubes = []; // Clear existing cubes
+    this.horizontal_position = 0; // Reset player position
+    this.is_paused = false; // Ensure game is not paused
+
+    // Clear any game over UI
+    if (this.game_over_container) {
+      this.game_over_container.style.display = 'none';
+    }
+
+    // Reset spawn timing
+    this.lastSpawnTime = performance.now();
+
+    // Any other resets needed (e.g., player health, game level)
+    // ...
+
+    // Optionally, refocus or click to start
+  }
+
+
+
+  showGameOverScreen() {
+    if (!this.game_over_container) {
+      this.game_over_container = document.createElement('div');
+      this.game_over_container.style.position = 'absolute';
+      this.game_over_container.style.top = '50%';
+      this.game_over_container.style.left = '50%';
+      this.game_over_container.style.transform = 'translate(-50%, -50%)';
+      this.game_over_container.style.fontSize = '30px';
+      this.game_over_container.style.color = 'white';
+      this.game_over_container.style.textAlign = 'center';
+      this.game_over_container.style.zIndex = '1000'; // Ensure it's on top
+      document.body.appendChild(this.game_over_container);
+
+      // "Play Again" button
+      this.play_again_button = document.createElement('button');
+      this.play_again_button.textContent = 'Play Again';
+      this.play_again_button.style.marginTop = '20px';
+      this.play_again_button.onclick = () => {
+        this.resetGame();
+      };
+      this.game_over_container.appendChild(this.play_again_button);
+    }
+
+    this.game_over_container.innerHTML = `GAME OVER<br>Final Score: ${Math.floor(this.current_score)}<br>`;
+    this.game_over_container.appendChild(this.play_again_button); // Re-add the button since innerHTML would remove it
+    this.game_over_container.style.display = 'block'; // Make sure it's visible
+  }
+
+
+
   make_control_panel() {
     // this.key_triggered_button("Outline", ["o"], () => {
     //     this.outline = !this.outline;
@@ -390,7 +445,7 @@ export class CubeRunner extends Base_Scene {
         if (this.isColliding(playerPos, cubePos, this.cubeSize / 2)) { // Assuming the cubeSize refers to the full side length; we want radius
           this.started = false; // Stop the game
           // Optionally, perform any cleanup or display a game over message
-          alert("Game Over");
+          this.showGameOverScreen(); // Show game over screen instead of the alert
           return; // Exit the loop to avoid further processing
         }
       });
