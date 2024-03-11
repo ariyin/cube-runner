@@ -336,46 +336,147 @@ export class CubeRunner extends Base_Scene {
 
   showGameOverScreen() {
     if (!this.game_over_container) {
-      this.game_over_container =
-        document.createElement('div')
-      this.game_over_container.style.position = 'absolute'
-      this.game_over_container.style.top = '30%'
-      this.game_over_container.style.left = '50%'
-      this.game_over_container.style.transform =
-        'translate(-50%, -50%)'
-      this.game_over_container.style.fontSize = '80px'
-      this.game_over_container.style.color = 'white'
-      this.game_over_container.style.textAlign = 'center'
-      this.game_over_container.style.zIndex = '1000' // Ensure it's on top
-      document.body.appendChild(this.game_over_container)
-
-      // "Play Again" button
-      this.play_again_button =
-        document.createElement('button')
-      this.play_again_button.textContent = 'Play Again'
-      this.play_again_button.style.marginTop = '20px'
-      this.play_again_button.style.padding = '15px 80px'
-      this.play_again_button.style.fontSize = '24px'
-      this.play_again_button.style.backgroundColor =
-        'transparent'
-      this.play_again_button.style.color = 'white'
-      this.play_again_button.style.border =
-        '3px solid white'
-      this.play_again_button.style.borderRadius = '30px'
-      this.play_again_button.style.cursor = 'pointer'
-      this.play_again_button.onclick = () => {
-        this.resetGame()
-      }
-      this.game_over_container.appendChild(
-        this.play_again_button
-      )
+      this.game_over_container = document.createElement('div');
+      this.game_over_container.style.position = 'absolute';
+      this.game_over_container.style.top = '30%';
+      this.game_over_container.style.left = '50%';
+      this.game_over_container.style.transform = 'translate(-50%, -50%)';
+      this.game_over_container.style.fontSize = '80px';
+      this.game_over_container.style.color = 'white';
+      this.game_over_container.style.textAlign = 'center';
+      this.game_over_container.style.zIndex = '1000'; // Ensure it's on top
+      document.body.appendChild(this.game_over_container);
     }
 
-    this.game_over_container.innerHTML = `GAME OVER <br/>`
-    this.game_over_container.appendChild(
-      this.play_again_button
-    ) // Re-add the button since innerHTML would remove it
-    this.game_over_container.style.display = 'block' // Make sure it's visible
+    // Clear previous content
+    this.game_over_container.innerHTML = '';
+
+    // Create and add game over text
+    const gameOverText = document.createElement('div');
+    gameOverText.textContent = 'GAME OVER';
+    this.game_over_container.appendChild(gameOverText);
+
+    // Display the current score
+    const currentScoreText = document.createElement('div');
+    currentScoreText.textContent = `Your Score: ${Math.floor(this.current_score)}`;
+    currentScoreText.style.fontSize = '24px'; // Customize as needed
+    currentScoreText.style.color = 'white'; // Customize as needed
+    this.game_over_container.appendChild(currentScoreText);
+
+    // Display the best score
+    const bestScoreText = document.createElement('div');
+    bestScoreText.textContent = `Best Score: ${Math.floor(this.high_score)}`;
+    bestScoreText.style.fontSize = '24px'; // Customize as needed
+    bestScoreText.style.color = 'gold'; // Customize as needed
+    this.game_over_container.appendChild(bestScoreText);
+
+
+    // Check if "Play Again" button already exists
+    if (!this.play_again_button) {
+      this.play_again_button = document.createElement('button');
+      this.play_again_button.textContent = 'Play Again';
+      this.play_again_button.style.marginTop = '20px';
+      // Set up styling as before
+      // Add any additional styles you need
+      this.play_again_button.onclick = () => {
+        this.resetGame();
+      };
+    }
+
+    // Apply styles to "Play Again" button
+    this.play_again_button.style.padding = '10px 20px';
+    this.play_again_button.style.fontSize = '18px';
+    this.play_again_button.style.backgroundColor = '#808080';
+    this.play_again_button.style.color = 'white';
+    this.play_again_button.style.border = 'none';
+    this.play_again_button.style.borderRadius = '5px';
+    this.play_again_button.style.cursor = 'pointer';
+    this.play_again_button.style.marginTop = '10px';
+    this.play_again_button.style.marginRight = '5px';
+    this.play_again_button.style.transition = 'background-color 0.3s';
+
+    this.play_again_button.onmouseover = function() {
+      this.style.backgroundColor = '#45a049';
+    };
+    this.play_again_button.onmouseout = function() {
+      this.style.backgroundColor = '#808080'; // Change back to grey
+    };
+
+
+    // Append the "Play Again" button
+    this.game_over_container.appendChild(this.play_again_button);
+
+    // Check if "EXIT TO MAIN MENU" button already exists
+    if (!this.exit_to_main_menu_button) {
+      this.exit_to_main_menu_button = document.createElement('button');
+      this.exit_to_main_menu_button.textContent = 'Main Menu';
+      // Set up styling as before
+      // Add any additional styles you need
+      this.exit_to_main_menu_button.onclick = () => {
+        this.showMainMenu();
+      };
+    }
+
+    // Apply styles to "EXIT TO MAIN MENU" button
+    this.exit_to_main_menu_button.style.padding = '10px 20px';
+    this.exit_to_main_menu_button.style.fontSize = '18px';
+    this.exit_to_main_menu_button.style.backgroundColor = '#808080';
+    this.exit_to_main_menu_button.style.color = 'white';
+    this.exit_to_main_menu_button.style.border = 'none';
+    this.exit_to_main_menu_button.style.borderRadius = '5px';
+    this.exit_to_main_menu_button.style.cursor = 'pointer';
+    this.exit_to_main_menu_button.style.marginTop = '20px';
+    this.exit_to_main_menu_button.style.marginRight = '5px';
+
+    this.exit_to_main_menu_button.style.transition = 'background-color 0.3s';
+
+    this.exit_to_main_menu_button.onmouseover = function() {
+      this.style.backgroundColor = '#d32f2f';
+    };
+    this.exit_to_main_menu_button.onmouseout = function() {
+      this.style.backgroundColor = '#808080'; // Change back to grey
+    };
+
+    // Append the "EXIT TO MAIN MENU" button
+    this.game_over_container.appendChild(this.exit_to_main_menu_button);
+
+    // Check if "Leaderboards" button already exists
+    if (!this.leaderboards_button) {
+      this.leaderboards_button = document.createElement('button');
+      this.leaderboards_button.textContent = 'Leaderboards';
+      // Add any additional functionality for the leaderboards button
+      this.leaderboards_button.onclick = () => {
+        console.log('Leaderboards clicked'); // Placeholder functionality
+      };
+    }
+
+// Apply styles to "Leaderboards" button
+    this.leaderboards_button.style.padding = '10px 20px';
+    this.leaderboards_button.style.fontSize = '18px';
+    this.leaderboards_button.style.backgroundColor = '#808080'; // Feel free to customize the color
+    this.leaderboards_button.style.color = 'white';
+    this.leaderboards_button.style.border = 'none';
+    this.leaderboards_button.style.borderRadius = '5px';
+    this.leaderboards_button.style.cursor = 'pointer';
+    this.leaderboards_button.style.marginTop = '20px'; // Adjust as needed based on layout
+    this.leaderboards_button.style.marginRight = '5px';
+    this.leaderboards_button.style.transition = 'background-color 0.3s';
+
+    this.leaderboards_button.onmouseover = function() {
+      this.style.backgroundColor = '#A020F0'; // Darker shade for hover, adjust as needed
+    };
+    this.leaderboards_button.onmouseout = function() {
+      this.style.backgroundColor = '#808080'; // Change back to grey
+    };
+
+    // Append the "Leaderboards" button
+    this.game_over_container.appendChild(this.leaderboards_button);
+
+
+
+
+    // Display the container
+    this.game_over_container.style.display = 'block';
   }
 
   make_control_panel() {
@@ -421,6 +522,14 @@ export class CubeRunner extends Base_Scene {
 
   display(context, program_state) {
     super.display(context, program_state)
+
+    // Hide score container when not in game
+    if (!this.started && this.score_container) {
+      this.score_container.style.display = 'none';
+    } else if (!this.started && this.score_container) {
+      // Game is not started, hide the score container
+      this.score_container.style.display = 'none';
+    }
 
     // Background audio
     if (!this.music) {
@@ -517,6 +626,10 @@ export class CubeRunner extends Base_Scene {
       }
     } else {
       // Gameplay
+      // Game has started
+      if (this.score_container) {
+        this.score_container.style.display = 'block'; // Show score container during gameplay
+      }
       // Clear start screen
       if (this.start_title) {
         this.start_title.style.display = 'none'
@@ -700,6 +813,43 @@ export class CubeRunner extends Base_Scene {
       });
 
     }
+  }
+
+  showMainMenu() {
+    // Instead of directly starting the game again, we set up the main menu.
+    this.started = false; // Ensure the game is not marked as started.
+    if (this.score_container) {
+      this.score_container.style.display = 'none';
+    }
+    this.current_score = 0; // Optionally reset the current score, or you might want to keep the score until a new game starts.
+    // Reset the high score.
+    this.high_score = 0;
+
+    // Hide any game-specific UI elements that should not be visible in the main menu.
+    if (this.game_over_container) {
+      this.game_over_container.style.display = 'none';
+    }
+
+    // Show main menu elements
+    if (this.start_title) {
+      this.start_title.style.display = 'block';
+    }
+    if (this.start_button) {
+      this.start_button.style.display = 'block';
+    }
+    if (this.difficultyContainer) {
+      this.difficultyContainer.style.display = 'flex';
+    }
+
+    if (this.started && this.score_container) {
+      this.score_container.style.display = 'block';
+    }
+
+
+    // Reset or clear any game state variables if necessary
+    this.is_paused = false;
+    this.spawnedCubes = []; // Clear spawned cubes if necessary.
+    // Any other game state resets as needed.
   }
 
   showAchievementNotification() {
