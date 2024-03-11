@@ -458,7 +458,7 @@ export class CubeRunner extends Base_Scene {
         this.start_button = document.createElement('button')
         this.start_button.textContent = 'Play'
         this.start_button.style.position = 'absolute'
-        this.start_button.style.top = '50%'
+        this.start_button.style.top = '30%'
         this.start_button.style.left = '50%'
         this.start_button.style.transform =
           'translate(-50%, -50%)'
@@ -483,7 +483,7 @@ export class CubeRunner extends Base_Scene {
           this.difficultyContainer.style.display = "flex";
           this.difficultyContainer.style.justifyContent = "center";
           this.difficultyContainer.style.position = "absolute";
-          this.difficultyContainer.style.top = "calc(50% + 100px)";
+          this.difficultyContainer.style.top = "calc(40%)";
           this.difficultyContainer.style.left = "50%";
           this.difficultyContainer.style.transform = "translate(-50%, -50%)";
 
