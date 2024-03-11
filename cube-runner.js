@@ -250,7 +250,7 @@ export class CubeRunner extends Base_Scene {
     this.current_score = 0
     this.high_score = 0
     this.is_paused = false
-    this.play_music = true
+    this.play_music = false
 
     // User
     this.outline = false
@@ -261,15 +261,13 @@ export class CubeRunner extends Base_Scene {
 
     // Camera tilt
     this.tilt_angle = 0
-    this.tilt_speed = 0.05
+    this.tilt_speed = 0.2
     this.tilt_acceleration = 0.005
-    this.max_tilt_speed = 0.1
-    this.max_tilt_angle = Math.PI / 20
 
     // Additional properties for managing cubes
     this.cubeSize = 4 // Sets cube size of player
     this.spawnedCubes = [] // Store the positions and IDs of spawned cubes
-    this.spawnRate = 100 // Time in milliseconds between cube spawns
+    this.spawnRate = 50 // Time in milliseconds between cube spawns
     this.lastSpawnTime = 0 // Last spawn time
     this.cubeSpeed = 25 // Speed at which cubes move towards the player
 
@@ -292,7 +290,7 @@ export class CubeRunner extends Base_Scene {
   spawnCube() {
     // Generate a position X based on the player's current position
     // This could be a random value within a range that moves with the player
-    const range = 20; // The range to the left and right of the player to spawn cubes
+    const range = 40; // The range to the left and right of the player to spawn cubes
     const positionX = this.horizontal_position + (Math.random() - 0.5) * 2 * range;
 
     // Keep the Z position as it determines how far ahead cubes spawn
@@ -558,7 +556,7 @@ export class CubeRunner extends Base_Scene {
       this.spawnedCubes.forEach((cube, index) => {
         let playerPos = {
           x: this.horizontal_position,
-          z: 0,
+          z: 10,
         } // Z is always 0 since we're assuming it's a fixed lane
         let cubePos = {
           x: cube.positionX,
@@ -614,55 +612,46 @@ export class CubeRunner extends Base_Scene {
       })
 
       // Adjust tilt angle based on user input
-      // TODO: exponentiate the tilt speed
+      const acceleration = 0.5;
+      const acceleration_factor = acceleration * dt ** 2;
+
       if (this.left_key_pressed) {
-        this.horizontal_position -= this.speed * dt
-        this.tilt_angle =
-          this.tilt_angle - this.tilt_speed * dt
+        this.horizontal_position -= this.speed * dt - 0.5 * acceleration_factor;
+        this.tilt_angle -= this.tilt_speed * dt - acceleration_factor;
       } else if (this.right_key_pressed) {
-        this.horizontal_position += this.speed * dt
-        this.tilt_angle =
-          this.tilt_angle + this.tilt_speed * dt
+        this.horizontal_position += this.speed * dt + 0.5 * acceleration_factor;
+        this.tilt_angle += this.tilt_speed * dt + acceleration_factor;
       } else {
         // Gradually return tilt angle to zero when no button is pressed
         if (this.tilt_angle > 0) {
-          this.tilt_angle = Math.max(
-            0,
-            this.tilt_angle - this.tilt_speed * dt
-          )
+          this.tilt_angle = Math.max(0, this.tilt_angle - this.tilt_speed * dt - acceleration_factor);
         } else if (this.tilt_angle < 0) {
-          this.tilt_angle = Math.min(
-            0,
-            this.tilt_angle + this.tilt_speed * dt
-          )
+          this.tilt_angle = Math.min(0, this.tilt_angle + this.tilt_speed * dt + acceleration_factor);
         }
       }
 
-      // cap the maximum tilt angle
-      this.tilt_angle = Math.max(
-        Math.min(this.tilt_angle, Math.PI / 72),
-        -Math.PI / 72
-      )
-
+      // Cap the maximum tilt angle
+      this.tilt_angle = Math.max(Math.min(this.tilt_angle, 0.045), -0.045)
+      
       let cube_transform = Mat4.translation(
         this.horizontal_position,
         0,
         0
       )
-
+      
       let camera_position = Mat4.inverse(
         Mat4.translation(0, 5, 30)
           .times(Mat4.rotation(-this.tilt_angle, 0, 0, 1))
           .times(cube_transform)
       )
-
+      
       program_state.set_camera(camera_position)
       program_state.projection_transform = Mat4.perspective(
         Math.PI / 4,
         context.width / context.height,
         1,
         100
-      )
+      )      
 
       // Transformation of floor and user
       let floor_transform = Mat4.identity().times(
@@ -682,11 +671,10 @@ export class CubeRunner extends Base_Scene {
         context,
         program_state,
         cube_transform
-          .times(
-            Mat4.rotation(this.tilt_angle * 10, 0, 0, 1)
-          )
+          .times(Mat4.rotation(-this.tilt_angle * 5, 0, 0, 1))
           .times(Mat4.rotation(Math.PI, 0, 1, 0))
-          .times(Mat4.scale(1.4, 1.4, 1.4)),
+          .times(Mat4.translation(0, 0, -10, 0))
+          .times(Mat4.scale(0.8, 0.8, 0.8)),
         this.materials.spaceship
       )
 
