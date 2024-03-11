@@ -269,19 +269,40 @@ export class CubeRunner extends Base_Scene {
     // Additional properties for managing cubes
     this.cubeSize = 4 // Sets cube size of player
     this.spawnedCubes = [] // Store the positions and IDs of spawned cubes
-    this.spawnRate = 500 // Time in milliseconds between cube spawns
+    this.spawnRate = 100 // Time in milliseconds between cube spawns
     this.lastSpawnTime = 0 // Last spawn time
     this.cubeSpeed = 25 // Speed at which cubes move towards the player
 
-    this.current_time = performance.now()
+    this.current_time = performance.now();
+
+    this.difficulty = "Easy";
+    this.achievements = [
+        { score: 100, achieved: false },
+        { score: 200, achieved: false },
+        { score: 500, achieved: false },
+        { score: 1000, achieved: false },
+        { score: 2000, achieved: false },
+        { score: 5000, achieved: false },
+        { score: 10000, achieved: false },
+    ];
+    this.currentAchievement = null; // To store the currently displayed achievement
   }
 
   // Method to spawn cubes randomly
   spawnCube() {
-    const positionX = Math.random() * 20 - 10 // Random position in X axis, adjust range as needed
-    const positionZ = -50 // Start far away on the Z axis
-    const cubeID = Math.random().toString(36).substr(2, 9) // Generate a unique ID for each cube
-    this.spawnedCubes.push({ positionX, positionZ, cubeID })
+    // Generate a position X based on the player's current position
+    // This could be a random value within a range that moves with the player
+    const range = 20; // The range to the left and right of the player to spawn cubes
+    const positionX = this.horizontal_position + (Math.random() - 0.5) * 2 * range;
+
+    // Keep the Z position as it determines how far ahead cubes spawn
+    const positionZ = -50; // Start far away on the Z axis to move towards the player
+
+    // Generate a unique ID for each cube for identification
+    const cubeID = Math.random().toString(36).substr(2, 9);
+
+    // Push the new cube into the spawnedCubes array with its calculated positions
+    this.spawnedCubes.push({ positionX, positionZ, cubeID });
   }
 
   // Method to see if player is colliding
@@ -453,6 +474,48 @@ export class CubeRunner extends Base_Scene {
           this.started = true
         }
         document.body.appendChild(this.start_button)
+
+        // Difficulty selection buttons setup
+        if (!this.difficultyButtonsAdded) {
+          const buttonStyles = `padding: 5px 15px; font-size: 16px; margin: 5px; background-color: #333; color: white; border: 2px solid white; border-radius: 5px; cursor: pointer;`;
+          const difficulties = ["Easy", "Medium", "Hard"];
+          this.difficultyContainer = document.createElement("div"); // Assign it to this.difficultyContainer
+          this.difficultyContainer.style.display = "flex";
+          this.difficultyContainer.style.justifyContent = "center";
+          this.difficultyContainer.style.position = "absolute";
+          this.difficultyContainer.style.top = "calc(50% + 100px)";
+          this.difficultyContainer.style.left = "50%";
+          this.difficultyContainer.style.transform = "translate(-50%, -50%)";
+
+          difficulties.forEach((difficulty) => {
+            const difficultyButton = document.createElement("button");
+            difficultyButton.innerText = difficulty;
+            difficultyButton.setAttribute("style", buttonStyles);
+            difficultyButton.onclick = () => {
+              this.difficulty = difficulty;
+              switch (difficulty) {
+                case "Easy":
+                  this.cubeSpeed = 15;
+                  break;
+                case "Medium":
+                  this.cubeSpeed = 25;
+                  break;
+                case "Hard":
+                  this.cubeSpeed = 100;
+                  break;
+                default:
+                  this.cubeSpeed = 25; // Default to Medium if something goes wrong
+              }
+              console.log(`Difficulty set to ${difficulty}`);
+              // Optional: Hide difficulty buttons right away or trigger other UI changes
+            };
+            this.difficultyContainer.appendChild(difficultyButton);
+          });
+
+          document.body.appendChild(this.difficultyContainer);
+          this.difficultyButtonsAdded = true;
+        }
+
       }
     } else {
       // Gameplay
@@ -462,6 +525,9 @@ export class CubeRunner extends Base_Scene {
       }
       if (this.start_button) {
         this.start_button.style.display = 'none'
+      }
+      if (this.difficultyContainer) {
+        this.difficultyContainer.style.display = "none";
       }
 
       let dt = program_state.animation_delta_time / 1000
@@ -631,6 +697,61 @@ export class CubeRunner extends Base_Scene {
         )
       }
       this.render_score()
+      this.achievements.forEach((achievement) => {
+          if (!achievement.achieved && this.current_score >= achievement.score) {
+          console.log(`Achievement unlocked: ${achievement.score} points!`);
+          achievement.achieved = true;
+          // Store the achievement notification
+          this.currentAchievement = {
+            message: `Achievement Unlocked: ${achievement.score} points!`,
+            timestamp: performance.now() // Current time in milliseconds
+          };
+          // Show achievement notification
+          this.showAchievementNotification();
+        }
+      });
+
+    }
+  }
+
+  showAchievementNotification() {
+    // Ensure the achievement notification container exists
+    if (!this.achievement_container) {
+      this.achievement_container = document.createElement("div");
+      this.achievement_container.style.position = "absolute";
+      this.achievement_container.style.color = "gold";
+      this.achievement_container.style.fontSize = "18px";
+      this.achievement_container.style.zIndex = "1001"; // Ensure it appears above the score container
+      this.achievement_container.style.background = "rgba(0, 0, 0, 0.7)";
+      this.achievement_container.style.padding = "5px";
+      this.achievement_container.style.borderRadius = "5px";
+      this.achievement_container.style.marginTop = "30px"; // Place it directly below the score container, adjust as necessary
+      this.achievement_container.style.right = "5px"; // Align with the score container
+    }
+
+    // Set the achievement text and display it
+    if (this.currentAchievement) {
+      this.achievement_container.textContent = this.currentAchievement.message;
+
+      // Append to the same parent as the score container to maintain layout consistency
+      const canvasElement = document.querySelector("#main-canvas");
+      if (canvasElement) {
+        canvasElement.appendChild(this.achievement_container); // Append directly to the canvas for simplicity
+      }
+
+      // Dynamically adjust the top position based on the height of the score container plus some margin
+      // This assumes the score_container is already appended and has a fixed height
+      const scoreRect = this.score_container.getBoundingClientRect();
+      this.achievement_container.style.top = `${scoreRect.bottom + 5}px`; // 5px below the score container
+
+      this.achievement_container.style.display = "block";
+
+      // Hide the notification after 5 seconds
+      setTimeout(() => {
+        this.achievement_container.style.display = "none";
+        // Clear the current achievement to allow new ones to be displayed later
+        this.currentAchievement = null;
+      }, 5000);
     }
   }
 
