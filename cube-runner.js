@@ -78,28 +78,6 @@ class Cube_Outline extends Shape {
   }
 }
 
-class Floor extends Shape {
-  constructor() {
-    super('position', 'normal')
-    // Define vertex positions for a simple floor plane
-    this.arrays.position = Vector3.cast(
-      [-100, 0, -50],
-      [100, 0, -50],
-      [-100, 0, 50],
-      [100, 0, 50]
-    )
-    // Define normals for the floor plane
-    this.arrays.normal = Vector3.cast(
-      [0, 1, 0],
-      [0, 1, 0],
-      [0, 1, 0],
-      [0, 1, 0]
-    )
-    // Define indices to form triangles from the vertices
-    this.indices.push(0, 1, 2, 1, 3, 2)
-  }
-}
-
 // A Scene that can be added to any display canvas.
 // Setup the shapes, materials, camera, and lighting here.
 class Base_Scene extends Scene {
@@ -178,7 +156,7 @@ export class CubeRunner extends Base_Scene {
     this.current_score = 0
     this.high_score = 0
     this.is_paused = false
-    this.play_music = false
+    this.play_music = true
     this.theme = 'Basic' // basic, synthwave, sky
 
     // User
@@ -276,6 +254,12 @@ export class CubeRunner extends Base_Scene {
       document.body.appendChild(this.game_over_container);
     }
 
+    if (this.music) {
+      this.music.pause();
+      document.body.removeChild(this.music);
+      this.music = null;
+    }
+
     // Clear previous content
     this.game_over_container.innerHTML = '';
 
@@ -297,7 +281,6 @@ export class CubeRunner extends Base_Scene {
     bestScoreText.style.fontSize = '24px'; // Customize as needed
     bestScoreText.style.color = 'gold'; // Customize as needed
     this.game_over_container.appendChild(bestScoreText);
-
 
     // Check if "Play Again" button already exists
     if (!this.play_again_button) {
@@ -452,24 +435,23 @@ export class CubeRunner extends Base_Scene {
       this.score_container.style.display = 'none';
     }
 
-    // Background audio
-    if (!this.music) {
-      this.music = document.createElement('audio')
-      this.music.id = 'background-music'
-      this.music.autoplay = true
-      this.music.loop = true
-      this.music.src = 'backinshape.mp4'
-      document.body.appendChild(this.music)
-    }
-
-    if (this.play_music) {
-      this.music.play()
-    } else {
-      this.music.pause()
-    }
-
     if (!this.started) {
       // Starting screen
+      if (!this.lobbyMusic) {
+        this.lobbyMusic = document.createElement('audio')
+        this.lobbyMusic.id = 'background-music'
+        this.lobbyMusic.autoplay = true
+        this.lobbyMusic.loop = true
+        this.lobbyMusic.src = 'audio/lastsurprise.mp3'
+        document.body.appendChild(this.lobbyMusic)
+      }
+
+      if (this.play_music) {
+        this.lobbyMusic.play()
+      } else {
+        this.lobbyMusic.pause()
+      }
+
       if (!this.start_title) {
         this.start_title = document.createElement('div')
         this.start_title.textContent = 'Cube Runner'
@@ -583,6 +565,38 @@ export class CubeRunner extends Base_Scene {
       }
     } else {
       // Gameplay
+      // Background audio
+      if (this.lobbyMusic) {
+        this.lobbyMusic.pause();
+        document.body.removeChild(this.lobbyMusic);
+        this.lobbyMusic = null;
+      }
+
+      let music_url = '';
+
+      if (this.theme === "Basic") {
+        music_url = 'audio/ost.mp3'
+      } else if (this.theme === "Synthwave") {
+        music_url  = 'audio/perfectnight.mp3'
+      } else if (this.theme === "Sky") {
+        music_url = 'audio/snowfall.mp3'
+      }
+
+      if (!this.music) {
+        this.music = document.createElement('audio')
+        this.music.id = 'background-music'
+        this.music.autoplay = true
+        this.music.loop = true
+        this.music.src = music_url
+        document.body.appendChild(this.music)
+      }
+
+      if (this.play_music) {
+        this.music.play()
+      } else {
+        this.music.pause()
+      }
+
       // Game has started
       if (this.score_container) {
         this.score_container.style.display = 'block'; // Show score container during gameplay
@@ -727,18 +741,18 @@ export class CubeRunner extends Base_Scene {
       let background_transform = Mat4.identity().times(Mat4.scale(300, 500, 1));
 
       // Draw floor and user
-      this.shapes.spaceship.draw(
-        context,
-        program_state,
-        Mat4.identity()
-          .times(Mat4.rotation(-this.tilt_angle * 5, 0, 0, 1))
-          .times(Mat4.rotation(Math.PI, 0, 1, 0))
-          .times(Mat4.translation(0, 0, -10, 0))
-          .times(Mat4.scale(0.8, 0.8, 0.8)),
-        this.materials.spaceship
-      )
-
-      if (this.theme === "Synthwave") {
+      if (this.theme === "Basic") {
+        this.shapes.spaceship.draw(
+          context,
+          program_state,
+          Mat4.identity()
+            .times(Mat4.rotation(-this.tilt_angle * 5, 0, 0, 1))
+            .times(Mat4.rotation(Math.PI, 0, 1, 0))
+            .times(Mat4.translation(0, 0, -10, 0))
+            .times(Mat4.scale(0.8, 0.8, 0.8)),
+          this.materials.spaceship
+        )
+      } else if (this.theme === "Synthwave") {
         this.shapes.background.draw(
           context, 
           program_state, 
@@ -755,6 +769,17 @@ export class CubeRunner extends Base_Scene {
             .times(Mat4.scale(60, 60, 60)),
           this.materials.bluegrid
         );
+
+        this.shapes.spaceship.draw(
+          context,
+          program_state,
+          Mat4.identity()
+            .times(Mat4.rotation(-this.tilt_angle * 5, 0, 0, 1))
+            .times(Mat4.rotation(Math.PI, 0, 1, 0))
+            .times(Mat4.translation(0, 0, -10, 0))
+            .times(Mat4.scale(0.8, 0.8, 0.8)),
+          this.materials.spaceship
+        )
       } else if (this.theme === "Sky") {
         this.shapes.background.draw(
           context, 
@@ -762,6 +787,19 @@ export class CubeRunner extends Base_Scene {
           background_transform, 
           this.materials.sky
         );
+
+        this.shapes.spaceship.draw(
+          context,
+          program_state,
+          Mat4.identity()
+            .times(Mat4.rotation(-this.tilt_angle * 5, 0, 0, 1))
+            .times(Mat4.rotation(Math.PI, 0, 1, 0))
+            .times(Mat4.translation(0, 0, -10, 0))
+            .times(Mat4.scale(0.8, 0.8, 0.8)),
+          this.materials.spaceship.override({
+            ambient: 0.2,
+          })
+        )
       }
 
       // Update and render score
@@ -820,6 +858,12 @@ export class CubeRunner extends Base_Scene {
     if (this.started && this.score_container) {
       this.score_container.style.display = 'block';
     }
+    if (this.music) {
+      // this.music.src = 'audio/lastsurprise.mp3'
+      this.music.pause();
+      document.body.removeChild(this.music);
+      this.music = null;
+  }
 
     // Reset or clear any game state variables if necessary
     this.is_paused = false;
