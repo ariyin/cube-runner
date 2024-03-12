@@ -107,6 +107,7 @@ class Base_Scene extends Scene {
     super()
 
     const initial_corner_point = vec3(-31, -12.5, -50);
+    // const initial_corner_point = vec3(-31, -12.87, -50);
     const row_operation = (s, p) => p ? Mat4.translation(0, 0.3, 0).times(p.to4(1)).to3()
         : initial_corner_point;
     const column_operation = (t, p) => Mat4.translation(0.3, 0, 0).times(p.to4(1)).to3();
@@ -246,7 +247,6 @@ export class CubeRunner extends Base_Scene {
     this.spawnedCubes = [] // Clear existing cubes
     this.horizontal_position = 0 // Reset player position
     this.is_paused = false // Ensure game is not paused
-    this.theme = "Basic"
 
     // Clear any game over UI
     if (this.game_over_container) {
@@ -378,7 +378,7 @@ export class CubeRunner extends Base_Scene {
       };
     }
 
-// Apply styles to "Leaderboards" button
+  // Apply styles to "Leaderboards" button
     this.leaderboards_button.style.padding = '10px 20px';
     this.leaderboards_button.style.fontSize = '18px';
     this.leaderboards_button.style.backgroundColor = '#808080'; // Feel free to customize the color
@@ -628,11 +628,12 @@ export class CubeRunner extends Base_Scene {
 
       this.spawnedCubes.forEach((cube, index) => {
         let playerPos = {
-          x: this.horizontal_position,
+          x: 0,
           z: 10,
         } // Z is always 0 since we're assuming it's a fixed lane
+
         let cubePos = {
-          x: cube.positionX,
+          x: cube.positionX - this.horizontal_position,
           z: cube.positionZ,
         }
 
@@ -644,10 +645,6 @@ export class CubeRunner extends Base_Scene {
           )
         ) {
           // Assuming the cubeSize refers to the full side length; we want radius
-          // TODO: Can comment out this.started = false and instead implement the following:
-          // Pause score
-          // All cubes stop moving
-          // Collision graphics
           this.started = false // Stop the game
           // Optionally, perform any cleanup or display a game over message
           this.showGameOverScreen() // Show game over screen instead of the alert
@@ -659,7 +656,7 @@ export class CubeRunner extends Base_Scene {
         if (cube.positionZ < 30) {
           // Check if cube is within visible range before drawing
           const cubeTransform = Mat4.translation(
-            cube.positionX,
+            cube.positionX - this.horizontal_position,
             0,
             cube.positionZ
           )
@@ -704,25 +701,18 @@ export class CubeRunner extends Base_Scene {
       } else {
         // Gradually return tilt angle to zero when no button is pressed
         if (this.tilt_angle > 0) {
-          this.tilt_angle = Math.max(0, this.tilt_angle - this.tilt_speed * dt - acceleration_factor);
+          this.tilt_angle = Math.max(0, this.tilt_angle - this.tilt_speed * dt - 0.5 * acceleration_factor);
         } else if (this.tilt_angle < 0) {
-          this.tilt_angle = Math.min(0, this.tilt_angle + this.tilt_speed * dt + acceleration_factor);
+          this.tilt_angle = Math.min(0, this.tilt_angle + this.tilt_speed * dt + 0.5 * acceleration_factor);
         }
       }
 
       // Cap the maximum tilt angle
       this.tilt_angle = Math.max(Math.min(this.tilt_angle, 0.045), -0.045)
-      
-      let cube_transform = Mat4.translation(
-        this.horizontal_position,
-        0,
-        0
-      )
-      
+
       let camera_position = Mat4.inverse(
         Mat4.translation(0, 5, 30)
           .times(Mat4.rotation(-this.tilt_angle, 0, 0, 1))
-          .times(cube_transform)
       )
       
       program_state.set_camera(camera_position)
@@ -740,10 +730,10 @@ export class CubeRunner extends Base_Scene {
       this.shapes.spaceship.draw(
         context,
         program_state,
-        cube_transform
+        Mat4.identity()
           .times(Mat4.rotation(-this.tilt_angle * 5, 0, 0, 1))
           .times(Mat4.rotation(Math.PI, 0, 1, 0))
-          .times(Mat4.translation(0, 1, -10, 0))
+          .times(Mat4.translation(0, 0, -10, 0))
           .times(Mat4.scale(0.8, 0.8, 0.8)),
         this.materials.spaceship
       )
