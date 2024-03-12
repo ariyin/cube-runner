@@ -17,103 +17,7 @@ const {
   Texture,
 } = tiny
 
-class Cube extends Shape {
-  constructor() {
-    super('position', 'normal')
-    // Loop 3 times (for each axis), and inside loop twice (for opposing cube sides):
-    this.arrays.position = Vector3.cast(
-      [-1, -1, -1],
-      [1, -1, -1],
-      [-1, -1, 1],
-      [1, -1, 1],
-      [1, 1, -1],
-      [-1, 1, -1],
-      [1, 1, 1],
-      [-1, 1, 1],
-      [-1, -1, -1],
-      [-1, -1, 1],
-      [-1, 1, -1],
-      [-1, 1, 1],
-      [1, -1, 1],
-      [1, -1, -1],
-      [1, 1, 1],
-      [1, 1, -1],
-      [-1, -1, 1],
-      [1, -1, 1],
-      [-1, 1, 1],
-      [1, 1, 1],
-      [1, -1, -1],
-      [-1, -1, -1],
-      [1, 1, -1],
-      [-1, 1, -1]
-    )
-    this.arrays.normal = Vector3.cast(
-      [0, -1, 0],
-      [0, -1, 0],
-      [0, -1, 0],
-      [0, -1, 0],
-      [0, 1, 0],
-      [0, 1, 0],
-      [0, 1, 0],
-      [0, 1, 0],
-      [-1, 0, 0],
-      [-1, 0, 0],
-      [-1, 0, 0],
-      [-1, 0, 0],
-      [1, 0, 0],
-      [1, 0, 0],
-      [1, 0, 0],
-      [1, 0, 0],
-      [0, 0, 1],
-      [0, 0, 1],
-      [0, 0, 1],
-      [0, 0, 1],
-      [0, 0, -1],
-      [0, 0, -1],
-      [0, 0, -1],
-      [0, 0, -1]
-    )
-    // Arrange the vertices into a square shape in texture space too:
-    this.indices.push(
-      0,
-      1,
-      2,
-      1,
-      3,
-      2,
-      4,
-      5,
-      6,
-      5,
-      7,
-      6,
-      8,
-      9,
-      10,
-      9,
-      11,
-      10,
-      12,
-      13,
-      14,
-      13,
-      15,
-      14,
-      16,
-      17,
-      18,
-      17,
-      19,
-      18,
-      20,
-      21,
-      22,
-      21,
-      23,
-      22
-    )
-  }
-}
+const {Cube, Textured_Phong} = defs
 
 class Cube_Outline extends Shape {
   constructor() {
@@ -201,24 +105,47 @@ class Floor extends Shape {
 class Base_Scene extends Scene {
   constructor() {
     super()
+
+    const initial_corner_point = vec3(-31, -12.5, -50);
+    const row_operation = (s, p) => p ? Mat4.translation(0, 0.3, 0).times(p.to4(1)).to3()
+        : initial_corner_point;
+    const column_operation = (t, p) => Mat4.translation(0.3, 0, 0).times(p.to4(1)).to3();
+
     this.shapes = {
       cube: new Cube(),
       spaceship: new Shape_From_File(
         '../assets/spaceship.obj'
       ),
       outline: new Cube_Outline(),
-      floor: new Floor(),
+      floor: new Cube(),
+      background: new defs.Grid_Patch(300, 400, row_operation, column_operation)
     }
+
     this.materials = {
       plastic: new Material(new defs.Phong_Shader(), {
-        ambient: 0.4,
-        diffusivity: 0.6,
+        ambient: 0.8,
+        diffusivity: 0.5,
         color: hex_color('#ffffff'),
       }),
       spaceship: new Material(new defs.Textured_Phong(), {
         ambient: 0.0,
         texture: new Texture('assets/mat.png'),
         color: hex_color('#ffffff'),
+      }),
+      synthwave: new Material(new Texture_Scroll_X(), {
+        ambient: 1,
+        texture: new Texture('assets/synthwave.png', "NEAREST"),
+        color: hex_color('#000000'),
+      }),
+      bluegrid: new Material(new Texture_Scroll_X(), {
+        ambient: 1,
+        texture: new Texture('assets/bluegrid.png', "NEAREST"),
+        color: hex_color('#000000'),
+      }),
+      sky: new Material(new Texture_Scroll_X(), {
+        ambient: 1,
+        texture: new Texture('assets/sky.png', "NEAREST"),
+        color: hex_color('#000000'),
       }),
     }
     // The white material and basic shader are used for drawing the outline.
@@ -251,9 +178,9 @@ export class CubeRunner extends Base_Scene {
     this.high_score = 0
     this.is_paused = false
     this.play_music = false
+    this.theme = 'Basic' // basic, synthwave, sky
 
     // User
-    this.outline = false
     this.left_key_pressed = false
     this.right_key_pressed = false
     this.horizontal_position = 0
@@ -319,6 +246,7 @@ export class CubeRunner extends Base_Scene {
     this.spawnedCubes = [] // Clear existing cubes
     this.horizontal_position = 0 // Reset player position
     this.is_paused = false // Ensure game is not paused
+    this.theme = "Basic"
 
     // Clear any game over UI
     if (this.game_over_container) {
@@ -472,9 +400,6 @@ export class CubeRunner extends Base_Scene {
     // Append the "Leaderboards" button
     this.game_over_container.appendChild(this.leaderboards_button);
 
-
-
-
     // Display the container
     this.game_over_container.style.display = 'block';
   }
@@ -514,10 +439,6 @@ export class CubeRunner extends Base_Scene {
         this.play_music = !this.play_music
       }
     )
-
-    this.key_triggered_button('Outline', ['o'], () => {
-      this.outline = !this.outline
-    })
   }
 
   display(context, program_state) {
@@ -623,6 +544,42 @@ export class CubeRunner extends Base_Scene {
           this.difficultyButtonsAdded = true;
         }
 
+        // Theme selection buttons setup
+        if (!this.themeButtonsAdded) {
+          const buttonStyles = `padding: 5px 15px; font-size: 16px; margin: 5px; background-color: #333; color: white; border: 2px solid white; border-radius: 5px; cursor: pointer;`;
+          const themes = ["Basic", "Synthwave", "Sky"];
+          this.themeContainer = document.createElement("div"); // Assign it to this.difficultyContainer
+          this.themeContainer.style.display = "flex";
+          this.themeContainer.style.justifyContent = "center";
+          this.themeContainer.style.position = "absolute";
+          this.themeContainer.style.top = "calc(45%)";
+          this.themeContainer.style.left = "50%";
+          this.themeContainer.style.transform = "translate(-50%, -50%)";
+
+          themes.forEach((theme) => {
+            const themeButton = document.createElement("button");
+            themeButton.innerText = theme;
+            themeButton.setAttribute("style", buttonStyles);
+            themeButton.onclick = () => {
+              switch (theme) {
+                case "Basic":
+                  this.theme = "Basic";
+                  break;
+                case "Synthwave":
+                  this.theme = "Synthwave";
+                  break;
+                case "Sky":
+                  this.theme = "Sky";
+                  break;
+              }
+              console.log(`Theme set to ${theme}`);
+            };
+            this.themeContainer.appendChild(themeButton);
+          });
+
+          document.body.appendChild(this.themeContainer);
+          this.themeButtonsAdded = true;
+        }
       }
     } else {
       // Gameplay
@@ -639,6 +596,9 @@ export class CubeRunner extends Base_Scene {
       }
       if (this.difficultyContainer) {
         this.difficultyContainer.style.display = "none";
+      }
+      if (this.themeContainer) {
+        this.themeContainer.style.display = "none";
       }
 
       let dt = program_state.animation_delta_time / 1000
@@ -696,22 +656,14 @@ export class CubeRunner extends Base_Scene {
       })
 
       this.spawnedCubes.forEach((cube) => {
-        if (cube.positionZ < 20) {
+        if (cube.positionZ < 30) {
           // Check if cube is within visible range before drawing
           const cubeTransform = Mat4.translation(
             cube.positionX,
             0,
             cube.positionZ
           )
-          if (this.outline) {
-            this.shapes.outline.draw(
-              context,
-              program_state,
-              cubeTransform,
-              this.white,
-              'LINES'
-            )
-          } else {
+          if (this.theme === "Basic") {
             this.shapes.cube.draw(
               context,
               program_state,
@@ -719,6 +671,21 @@ export class CubeRunner extends Base_Scene {
               this.materials.plastic.override({
                 color: hex_color('#f1a593'),
               })
+            )
+          } else if (this.theme === "Synthwave") {
+            this.shapes.outline.draw(
+              context,
+              program_state,
+              cubeTransform,
+              this.white,
+              'LINES'
+            )
+          } else if (this.theme === "Sky") {
+            this.shapes.cube.draw(
+              context,
+              program_state,
+              cubeTransform,
+              this.materials.plastic
             )
           }
         }
@@ -767,29 +734,45 @@ export class CubeRunner extends Base_Scene {
       )      
 
       // Transformation of floor and user
-      let floor_transform = Mat4.identity().times(
-        Mat4.translation(0, -1, 0)
-      )
+      let background_transform = Mat4.identity().times(Mat4.scale(300, 500, 1));
 
       // Draw floor and user
-      this.shapes.floor.draw(
-        context,
-        program_state,
-        floor_transform,
-        this.materials.plastic.override({
-          color: color(0.2, 0.2, 0.2, 1),
-        })
-      )
       this.shapes.spaceship.draw(
         context,
         program_state,
         cube_transform
           .times(Mat4.rotation(-this.tilt_angle * 5, 0, 0, 1))
           .times(Mat4.rotation(Math.PI, 0, 1, 0))
-          .times(Mat4.translation(0, 0, -10, 0))
+          .times(Mat4.translation(0, 1, -10, 0))
           .times(Mat4.scale(0.8, 0.8, 0.8)),
         this.materials.spaceship
       )
+
+      if (this.theme === "Synthwave") {
+        this.shapes.background.draw(
+          context, 
+          program_state, 
+          background_transform, 
+          this.materials.synthwave
+        );
+
+        this.shapes.floor.draw(
+          context,
+          program_state,
+          Mat4.identity()
+            .times(Mat4.translation(0, -66, -50, 0))
+            .times(Mat4.rotation(Math.PI/2, 1, 0, 0))
+            .times(Mat4.scale(60, 60, 60)),
+          this.materials.bluegrid
+        );
+      } else if (this.theme === "Sky") {
+        this.shapes.background.draw(
+          context, 
+          program_state, 
+          background_transform, 
+          this.materials.sky
+        );
+      }
 
       // Update and render score
       if (!this.is_paused) {
@@ -824,6 +807,7 @@ export class CubeRunner extends Base_Scene {
     this.current_score = 0; // Optionally reset the current score, or you might want to keep the score until a new game starts.
     // Reset the high score.
     this.high_score = 0;
+    this.theme = "Basic";
 
     // Hide any game-specific UI elements that should not be visible in the main menu.
     if (this.game_over_container) {
@@ -840,11 +824,12 @@ export class CubeRunner extends Base_Scene {
     if (this.difficultyContainer) {
       this.difficultyContainer.style.display = 'flex';
     }
-
+    if(this.themeContainer) {
+      this.themeContainer.style.display = 'flex';
+    }
     if (this.started && this.score_container) {
       this.score_container.style.display = 'block';
     }
-
 
     // Reset or clear any game state variables if necessary
     this.is_paused = false;
@@ -942,5 +927,22 @@ export class CubeRunner extends Base_Scene {
     this.current_score_element.textContent = `Score: ${Math.floor(
       this.current_score
     )}`
+  }
+}
+
+class Texture_Scroll_X extends Textured_Phong {
+  fragment_glsl_code() {
+      return this.shared_glsl_code() + `
+          varying vec2 f_tex_coord;
+          uniform sampler2D texture;
+          uniform float animation_time;
+          
+          void main(){
+              // Sample the texture image in the correct place:
+              vec4 tex_color = texture2D( texture, f_tex_coord);
+              if( tex_color.w < .01 ) discard;
+              gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
+              gl_FragColor.xyz += phong_model_lights( normalize( N ), vertex_worldspace );
+      } `;
   }
 }
