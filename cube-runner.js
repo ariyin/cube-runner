@@ -277,6 +277,20 @@ export class CubeRunner extends Base_Scene {
       { name: "Nick", score: 2000 },
       { name: "Aneesh", score: 1000 },
     ];
+
+    if(this.current_score > placeholderScores[placeholderScores.length - 1].score)
+    {
+      const userName = prompt("New High Score! Enter your name:");
+      if (!userName) return; // User cancelled the prompt
+
+      // Assuming 'placeholderScores' is accessible globally or within this context
+      placeholderScores.push({ name: userName, score: Math.round(this.current_score) });
+      // Sort the scores in descending order
+      placeholderScores.sort((a, b) => b.score - a.score);
+
+      placeholderScores.pop()
+    }
+
     const scoreList = document.createElement("ul");
     placeholderScores.forEach((entry, index) => {
       const scoreItem = document.createElement("li");
@@ -853,6 +867,9 @@ export class CubeRunner extends Base_Scene {
               })
             )
           } else if (this.theme === "Synthwave") {
+            // Temporarily override the white material's color for synthwave theme
+            const originalColor = this.white.color; // Store the original color
+            this.white.color = hex_color("#FF007F"); // Set to bright pink
             this.shapes.outline.draw(
               context,
               program_state,
@@ -860,6 +877,8 @@ export class CubeRunner extends Base_Scene {
               this.white,
               'LINES'
             )
+            // Restore the original color of the white material after drawing
+            this.white.color = originalColor;
           } else if (this.theme === "Sky") {
             this.shapes.cube.draw(
               context,
