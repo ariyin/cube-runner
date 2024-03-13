@@ -190,6 +190,20 @@ export class CubeRunner extends Base_Scene {
         { score: 10000, achieved: false },
     ];
     this.currentAchievement = null; // To store the currently displayed achievement
+
+    // Define placeholder high scores with names
+    this.placeholderScores = [
+      { name: "Giannis", score: 10000 },
+      { name: "AK@$", score: 9000 },
+      { name: "ASTEROID MASTER", score: 8000 },
+      { name: "JDCR", score: 7000 },
+      { name: "Majin", score: 6000 },
+      { name: "ThatOneDude001", score: 5000 },
+      { name: "pandalover234", score: 4000 },
+      { name: "beatmel0ser", score: 3000 },
+      { name: "Nick", score: 2000 },
+      { name: "Aneesh", score: 1000 },
+    ];
   }
 
   // Method to spawn cubes randomly
@@ -264,35 +278,21 @@ export class CubeRunner extends Base_Scene {
     // Clear previous content
     this.leaderboard_container.innerHTML = "<h2>Leaderboard</h2>";
 
-    // Define placeholder high scores with names
-    const placeholderScores = [
-      { name: "Giannis", score: 10000 },
-      { name: "AK@$", score: 9000 },
-      { name: "ASTEROID MASTER", score: 8000 },
-      { name: "JDCR", score: 7000 },
-      { name: "Majin", score: 6000 },
-      { name: "ThatOneDude001", score: 5000 },
-      { name: "pandalover234", score: 4000 },
-      { name: "beatmel0ser", score: 3000 },
-      { name: "Nick", score: 2000 },
-      { name: "Aneesh", score: 1000 },
-    ];
-
-    if(this.current_score > placeholderScores[placeholderScores.length - 1].score)
+    if(this.current_score > this.placeholderScores[this.placeholderScores.length - 1].score)
     {
       const userName = prompt("New High Score! Enter your name:");
       if (!userName) return; // User cancelled the prompt
 
       // Assuming 'placeholderScores' is accessible globally or within this context
-      placeholderScores.push({ name: userName, score: Math.round(this.current_score) });
+      this.placeholderScores.push({ name: userName, score: Math.round(this.current_score) });
       // Sort the scores in descending order
-      placeholderScores.sort((a, b) => b.score - a.score);
+      this.placeholderScores.sort((a, b) => b.score - a.score);
 
-      placeholderScores.pop()
+      this.placeholderScores.pop()
     }
 
     const scoreList = document.createElement("ul");
-    placeholderScores.forEach((entry, index) => {
+    this.placeholderScores.forEach((entry, index) => {
       const scoreItem = document.createElement("li");
       scoreItem.textContent = `#${index + 1}: ${entry.name} - ${entry.score} points`;
       scoreList.appendChild(scoreItem);
