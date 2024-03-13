@@ -179,7 +179,7 @@ export class CubeRunner extends Base_Scene {
 
     this.current_time = performance.now();
 
-    this.difficulty = "Easy";
+    this.difficulty = "Medium";
     this.achievements = [
         { score: 100, achieved: false },
         { score: 200, achieved: false },
@@ -363,6 +363,13 @@ export class CubeRunner extends Base_Scene {
     // Clear previous content
     this.game_over_container.innerHTML = '';
 
+    if (this.achievement_container) {
+      this.achievement_container.style.display = "none"
+    }
+    if (this.achievement_title) {
+      this.achievement_title.style.display = "none"
+    }
+
     // Create and add game over text
     const gameOverText = document.createElement('div');
     gameOverText.textContent = 'GAME OVER';
@@ -370,14 +377,14 @@ export class CubeRunner extends Base_Scene {
 
     // Display the current score
     const currentScoreText = document.createElement('div');
-    currentScoreText.textContent = `Your Score: ${Math.floor(this.current_score)}`;
+    currentScoreText.textContent = `YOUR SCORE: ${Math.floor(this.current_score)}`;
     currentScoreText.style.fontSize = '24px'; // Customize as needed
     currentScoreText.style.color = 'white'; // Customize as needed
     this.game_over_container.appendChild(currentScoreText);
 
     // Display the best score
     const bestScoreText = document.createElement('div');
-    bestScoreText.textContent = `Best Score: ${Math.floor(this.high_score)}`;
+    bestScoreText.textContent = `BEST SCORE: ${Math.floor(this.high_score)}`;
     bestScoreText.style.fontSize = '24px'; // Customize as needed
     bestScoreText.style.color = 'gold'; // Customize as needed
     this.game_over_container.appendChild(bestScoreText);
@@ -554,21 +561,22 @@ export class CubeRunner extends Base_Scene {
 
       if (!this.start_title) {
         this.start_title = document.createElement('div')
-        this.start_title.textContent = 'Cube Runner'
+        this.start_title.textContent = 'CUBE RUNNER'
         this.start_title.style.color = 'white'
         this.start_title.style.position = 'absolute'
-        this.start_title.style.top = '20%'
+        this.start_title.style.top = '10%'
         this.start_title.style.left = '50%'
         this.start_title.style.transform =
           'translate(-50%, -50%)'
-        this.start_title.style.fontSize = '80px'
+        this.start_title.style.fontSize = '64px'
         document.body.appendChild(this.start_title)
       }
+      
       if (!this.start_button) {
         this.start_button = document.createElement('button')
         this.start_button.textContent = 'Play'
         this.start_button.style.position = 'absolute'
-        this.start_button.style.top = '30%'
+        this.start_button.style.top = '50%'
         this.start_button.style.left = '50%'
         this.start_button.style.transform =
           'translate(-50%, -50%)'
@@ -584,84 +592,142 @@ export class CubeRunner extends Base_Scene {
           this.started = true
         }
         document.body.appendChild(this.start_button)
+      }
 
-        // Difficulty selection buttons setup
-        if (!this.difficultyButtonsAdded) {
-          const buttonStyles = `padding: 5px 15px; font-size: 16px; margin: 5px; background-color: #333; color: white; border: 2px solid white; border-radius: 5px; cursor: pointer;`;
-          const difficulties = ["Easy", "Medium", "Hard"];
-          this.difficultyContainer = document.createElement("div"); // Assign it to this.difficultyContainer
-          this.difficultyContainer.style.display = "flex";
-          this.difficultyContainer.style.justifyContent = "center";
-          this.difficultyContainer.style.position = "absolute";
-          this.difficultyContainer.style.top = "calc(40%)";
-          this.difficultyContainer.style.left = "50%";
-          this.difficultyContainer.style.transform = "translate(-50%, -50%)";
+      // Difficulty selection buttons setup
+      if (!this.difficultyButtonsAdded) {
+        const buttonStyles = `padding: 5px 15px; font-size: 16px; margin: 5px; background-color: #333; color: white; border: 2px solid white; border-radius: 5px; cursor: pointer;`;
+        const difficulties = ["Easy", "Medium", "Hard"];
+        this.difficultyContainer = document.createElement("div"); // Assign it to this.difficultyContainer
+        this.difficultyContainer.style.display = "flex";
+        this.difficultyContainer.style.justifyContent = "center";
+        this.difficultyContainer.style.position = "absolute";
+        this.difficultyContainer.style.top = "40%";
+        this.difficultyContainer.style.left = "50%";
+        this.difficultyContainer.style.transform = "translate(-50%, -50%)";
 
-          difficulties.forEach((difficulty) => {
-            const difficultyButton = document.createElement("button");
-            difficultyButton.innerText = difficulty;
-            difficultyButton.setAttribute("style", buttonStyles);
-            difficultyButton.onclick = () => {
-              this.difficulty = difficulty;
-              switch (difficulty) {
-                case "Easy":
-                  this.cubeSpeed = 15;
-                  break;
-                case "Medium":
-                  this.cubeSpeed = 25;
-                  break;
-                case "Hard":
-                  this.cubeSpeed = 100;
-                  break;
-                default:
-                  this.cubeSpeed = 25; // Default to Medium if something goes wrong
-              }
-              console.log(`Difficulty set to ${difficulty}`);
-              // Optional: Hide difficulty buttons right away or trigger other UI changes
-            };
-            this.difficultyContainer.appendChild(difficultyButton);
-          });
+        let selectedButton = null;
 
-          document.body.appendChild(this.difficultyContainer);
-          this.difficultyButtonsAdded = true;
-        }
+        difficulties.forEach((difficulty) => {
+          const difficultyButton = document.createElement("button");
+          difficultyButton.innerText = difficulty;
+          difficultyButton.setAttribute("style", buttonStyles);
 
-        // Theme selection buttons setup
-        if (!this.themeButtonsAdded) {
-          const buttonStyles = `padding: 5px 15px; font-size: 16px; margin: 5px; background-color: #333; color: white; border: 2px solid white; border-radius: 5px; cursor: pointer;`;
-          const themes = ["Basic", "Synthwave", "Sky"];
-          this.themeContainer = document.createElement("div"); // Assign it to this.difficultyContainer
-          this.themeContainer.style.display = "flex";
-          this.themeContainer.style.justifyContent = "center";
-          this.themeContainer.style.position = "absolute";
-          this.themeContainer.style.top = "calc(45%)";
-          this.themeContainer.style.left = "50%";
-          this.themeContainer.style.transform = "translate(-50%, -50%)";
+          if (difficulty === "Medium") {
+            selectedButton = difficultyButton;
+            selectedButton.style.color = 'black';
+            selectedButton.style.backgroundColor = 'white';
+          }
 
-          themes.forEach((theme) => {
-            const themeButton = document.createElement("button");
-            themeButton.innerText = theme;
-            themeButton.setAttribute("style", buttonStyles);
-            themeButton.onclick = () => {
-              switch (theme) {
-                case "Basic":
-                  this.theme = "Basic";
-                  break;
-                case "Synthwave":
-                  this.theme = "Synthwave";
-                  break;
-                case "Sky":
-                  this.theme = "Sky";
-                  break;
-              }
-              console.log(`Theme set to ${theme}`);
-            };
-            this.themeContainer.appendChild(themeButton);
-          });
+          difficultyButton.onclick = () => {
+            if (selectedButton) {
+              selectedButton.style.color = 'white';
+              selectedButton.style.backgroundColor = '#333';
+            } 
+            this.difficulty = difficulty;
+            switch (difficulty) {
+              case "Easy":
+                this.cubeSpeed = 15;
+                this.spawnRate = 100;
+                break;
+              case "Medium":
+                this.cubeSpeed = 25;
+                this.spawnRate = 50;
+                break;
+              case "Hard":
+                this.cubeSpeed = 100;
+                this.spawnRate = 45;
+                break;
+              default:
+                this.cubeSpeed = 25; // Default to Medium if something goes wrong
+                this.spawnRate = 50;
+            }
+            difficultyButton.style.color = 'black';
+            difficultyButton.style.backgroundColor = 'white';
+            selectedButton = difficultyButton;
+            console.log(`Difficulty set to ${difficulty}`);
+          };
+          this.difficultyContainer.appendChild(difficultyButton);
+        });
 
-          document.body.appendChild(this.themeContainer);
-          this.themeButtonsAdded = true;
-        }
+        document.body.appendChild(this.difficultyContainer);
+        this.difficultyButtonsAdded = true;
+      }
+
+      let url = '';
+
+      if (this.theme === "Basic") {
+        url = 'assets/basictn.png';
+      } else if (this.theme === "Synthwave") {
+        url = 'assets/synthwavetn.png';
+      } else if (this.theme === "Sky") {
+        url = 'assets/skytn.png';
+      }
+
+      if (!this.themeImagesAdded) {
+        this.themeImage = document.createElement("img");         
+        this.themeImage.style.position = "absolute";
+        this.themeImage.style.top = "24%";
+        this.themeImage.style.left = "50%";
+        this.themeImage.style.transform = "translate(-50%, -50%)";
+        this.themeImage.style.width = "275px"; 
+        document.body.appendChild(this.themeImage);
+        this.themeImagesAdded = true;
+      }
+
+      this.themeImage.src = url;
+
+      // Theme selection buttons setup
+      if (!this.themeButtonsAdded) {
+        const buttonStyles = `padding: 5px 15px; font-size: 16px; margin: 5px; background-color: #333; color: white; border: 2px solid white; border-radius: 5px; cursor: pointer;`;
+        const themes = ["Basic", "Synthwave", "Sky"];
+        this.themeContainer = document.createElement("div"); // Assign it to this.difficultyContainer
+        this.themeContainer.style.display = "flex";
+        this.themeContainer.style.justifyContent = "center";
+        this.themeContainer.style.position = "absolute";
+        this.themeContainer.style.top = "35%";
+        this.themeContainer.style.left = "50%";
+        this.themeContainer.style.transform = "translate(-50%, -50%)";
+
+        let selectedButton = null;
+
+        themes.forEach((theme) => {
+          const themeButton = document.createElement("button");
+          themeButton.innerText = theme;
+          themeButton.setAttribute("style", buttonStyles);
+
+          if (theme === "Basic") {
+            selectedButton = themeButton;
+            selectedButton.style.color = 'black';
+            selectedButton.style.backgroundColor = 'white';
+          }
+
+          themeButton.onclick = () => {
+            if (selectedButton) {
+              selectedButton.style.color = 'white';
+              selectedButton.style.backgroundColor = '#333';
+            } 
+            switch (theme) {
+              case "Basic":
+                this.theme = "Basic";
+                break;
+              case "Synthwave":
+                this.theme = "Synthwave";
+                break;
+              case "Sky":
+                this.theme = "Sky";
+                break;
+            }
+            themeButton.style.color = 'black';
+            themeButton.style.backgroundColor = 'white';
+            selectedButton = themeButton;
+            console.log(`Theme set to ${theme}`);
+          };
+          this.themeContainer.appendChild(themeButton);
+        });
+
+        document.body.appendChild(this.themeContainer);
+        this.themeButtonsAdded = true;
       }
     } else {
       // Gameplay
@@ -713,6 +779,9 @@ export class CubeRunner extends Base_Scene {
       }
       if (this.themeContainer) {
         this.themeContainer.style.display = "none";
+      }
+      if (this.themeImage) {
+        this.themeImage.style.display = "none";
       }
 
       let dt = program_state.animation_delta_time / 1000
@@ -915,7 +984,7 @@ export class CubeRunner extends Base_Scene {
           achievement.achieved = true;
           // Store the achievement notification
           this.currentAchievement = {
-            message: `Achievement Unlocked: ${achievement.score} points!`,
+            message: `${achievement.score} POINTS!`,
             timestamp: performance.now() // Current time in milliseconds
           };
           // Show achievement notification
@@ -958,6 +1027,9 @@ export class CubeRunner extends Base_Scene {
     if (this.started && this.score_container) {
       this.score_container.style.display = 'block';
     }
+    if (this.themeImage) {
+      this.themeImage.style.display = 'block';
+    }
     if (this.music) {
       // this.music.src = 'audio/lastsurprise.mp3'
       this.music.pause();
@@ -977,17 +1049,33 @@ export class CubeRunner extends Base_Scene {
       this.achievement_container = document.createElement("div");
       this.achievement_container.style.position = "absolute";
       this.achievement_container.style.color = "gold";
-      this.achievement_container.style.fontSize = "18px";
-      this.achievement_container.style.zIndex = "1001"; // Ensure it appears above the score container
-      this.achievement_container.style.background = "rgba(0, 0, 0, 0.7)";
-      this.achievement_container.style.padding = "5px";
+      this.achievement_container.style.fontSize = "20px";
+      this.achievement_container.style.zIndex = "1000"; // Ensure it appears above the score container
       this.achievement_container.style.borderRadius = "5px";
-      this.achievement_container.style.marginTop = "30px"; // Place it directly below the score container, adjust as necessary
-      this.achievement_container.style.right = "5px"; // Align with the score container
+      this.achievement_container.style.top = "40px";
+      this.achievement_container.style.left = "10px"; 
     }
 
     // Set the achievement text and display it
     if (this.currentAchievement) {
+      if (!this.achievement_title) {
+        this.achievement_title = document.createElement('div')
+        this.achievement_title.style.position = 'absolute'
+        this.achievement_title.style.left = '10px'
+        this.achievement_title.style.top = '10px'
+        this.achievement_title.style.color = 'white'
+        this.achievement_title.style.fontSize = '20px'
+        this.achievement_title.style.zIndex = '1000' // Make sure it's on top
+  
+        // Append the score container to the WebGL canvas created by Canvas_Widget
+        const canvasElement =
+          document.querySelector('#main-canvas') // Select the main canvas element
+        canvasElement.style.position = 'relative' // Ensure the canvas is positioned to anchor the score
+        canvasElement.appendChild(this.achievement_title)
+
+        this.achievement_title.textContent = "ACHIEVEMENT UNLOCKED:"
+      }
+
       this.achievement_container.textContent = this.currentAchievement.message;
 
       // Append to the same parent as the score container to maintain layout consistency
@@ -996,16 +1084,10 @@ export class CubeRunner extends Base_Scene {
         canvasElement.appendChild(this.achievement_container); // Append directly to the canvas for simplicity
       }
 
-      // Dynamically adjust the top position based on the height of the score container plus some margin
-      // This assumes the score_container is already appended and has a fixed height
-      const scoreRect = this.score_container.getBoundingClientRect();
-      this.achievement_container.style.top = `${scoreRect.bottom + 5}px`; // 5px below the score container
-
-      this.achievement_container.style.display = "block";
-
       // Hide the notification after 5 seconds
       setTimeout(() => {
         this.achievement_container.style.display = "none";
+        this.achievement_title.style.display = "none";
         // Clear the current achievement to allow new ones to be displayed later
         this.currentAchievement = null;
       }, 5000);
@@ -1028,8 +1110,8 @@ export class CubeRunner extends Base_Scene {
       this.score_container = document.createElement('div')
       // Fix positioning so it's consistently in the upper right of the canvas
       this.score_container.style.position = 'absolute'
-      this.score_container.style.right = '5px' // Keep score 5px from the right edge of the canvas
-      this.score_container.style.top = '5px' // Keep score 5px from the top edge of the canvas
+      this.score_container.style.right = '10px' // Keep score 5px from the right edge of the canvas
+      this.score_container.style.top = '10px' // Keep score 5px from the top edge of the canvas
       this.score_container.style.color = 'white'
       this.score_container.style.fontSize = '20px'
       this.score_container.style.textAlign = 'right'
@@ -1055,10 +1137,10 @@ export class CubeRunner extends Base_Scene {
     }
 
     // Update the score and high score displays
-    this.high_score_element.textContent = `High Score: ${Math.floor(
+    this.high_score_element.textContent = `HIGH SCORE: ${Math.floor(
       this.high_score
     )}`
-    this.current_score_element.textContent = `Score: ${Math.floor(
+    this.current_score_element.textContent = `SCORE: ${Math.floor(
       this.current_score
     )}`
   }
