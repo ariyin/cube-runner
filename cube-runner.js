@@ -240,6 +240,75 @@ export class CubeRunner extends Base_Scene {
     // Optionally, refocus or click to start
   }
 
+  showLeaderboard() {
+    // Ensure the leaderboard container exists
+    if (!this.leaderboard_container) {
+      this.leaderboard_container = document.createElement("div");
+      // Styling for the modal background
+      this.leaderboard_container.style.position = "fixed"; // Use fixed to keep it in place during scrolling
+      this.leaderboard_container.style.left = "50%";
+      this.leaderboard_container.style.top = "50%";
+      this.leaderboard_container.style.transform = "translate(-50%, -50%)";
+      this.leaderboard_container.style.width = "80%"; // Or any specific size
+      this.leaderboard_container.style.maxWidth = "600px"; // Maximum size
+      this.leaderboard_container.style.background = "rgba(0, 0, 0, 0.8)";
+      this.leaderboard_container.style.color = "white";
+      this.leaderboard_container.style.textAlign = "center";
+      this.leaderboard_container.style.padding = "20px";
+      this.leaderboard_container.style.borderRadius = "10px";
+      this.leaderboard_container.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
+      this.leaderboard_container.style.zIndex = "1001"; // Ensure it appears on top
+      document.body.appendChild(this.leaderboard_container);
+    }
+
+    // Clear previous content
+    this.leaderboard_container.innerHTML = "<h2>Leaderboard</h2>";
+
+    // Define placeholder high scores with names
+    const placeholderScores = [
+      { name: "Giannis", score: 10000 },
+      { name: "AK@$", score: 9000 },
+      { name: "ASTEROID MASTER", score: 8000 },
+      { name: "JDCR", score: 7000 },
+      { name: "Majin", score: 6000 },
+      { name: "ThatOneDude001", score: 5000 },
+      { name: "pandalover234", score: 4000 },
+      { name: "beatmel0ser", score: 3000 },
+      { name: "Nick", score: 2000 },
+      { name: "Aneesh", score: 1000 },
+    ];
+    const scoreList = document.createElement("ul");
+    placeholderScores.forEach((entry, index) => {
+      const scoreItem = document.createElement("li");
+      scoreItem.textContent = `#${index + 1}: ${entry.name} - ${entry.score} points`;
+      scoreList.appendChild(scoreItem);
+    });
+
+    this.leaderboard_container.appendChild(scoreList);
+
+    // Display the container
+    this.leaderboard_container.style.display = "block";
+
+    // Optionally, add a button to close the leaderboard and return to the main menu or game over screen
+    const closeButton = document.createElement("button");
+    closeButton.textContent = "Close";
+    closeButton.style.marginTop = "20px"; // Style as needed
+    closeButton.onclick = () => {
+      this.leaderboard_container.style.display = "none";
+    };
+    // Additional styling for the close button
+    closeButton.style.padding = '10px 20px';
+    closeButton.style.fontSize = '16px';
+    closeButton.style.backgroundColor = '#333';
+    closeButton.style.color = 'white';
+    closeButton.style.border = 'none';
+    closeButton.style.borderRadius = '5px';
+    closeButton.style.cursor = 'pointer';
+
+    this.leaderboard_container.appendChild(closeButton);
+  }
+
+
   showGameOverScreen() {
     if (!this.game_over_container) {
       this.game_over_container = document.createElement('div');
@@ -253,6 +322,37 @@ export class CubeRunner extends Base_Scene {
       this.game_over_container.style.zIndex = '1000'; // Ensure it's on top
       document.body.appendChild(this.game_over_container);
     }
+
+    // Setup Leaderboards button if not already done
+    if (!this.leaderboards_button) {
+      this.leaderboards_button = document.createElement('button');
+      this.leaderboards_button.textContent = 'Leaderboards';
+      this.leaderboards_button.style.padding = '10px 20px';
+      this.leaderboards_button.style.fontSize = '18px';
+      this.leaderboards_button.style.backgroundColor = '#808080'; // Feel free to customize the color
+      this.leaderboards_button.style.color = 'white';
+      this.leaderboards_button.style.border = 'none';
+      this.leaderboards_button.style.borderRadius = '5px';
+      this.leaderboards_button.style.cursor = 'pointer';
+      this.leaderboards_button.style.marginTop = '20px'; // Adjust as needed based on layout
+      this.leaderboards_button.style.marginRight = '5px';
+      this.leaderboards_button.style.transition = 'background-color 0.3s';
+
+      this.leaderboards_button.onmouseover = function() {
+        this.style.backgroundColor = '#A020F0'; // Darker shade for hover, adjust as needed
+      };
+      this.leaderboards_button.onmouseout = function() {
+        this.style.backgroundColor = '#808080'; // Change back to grey
+      };
+
+      // Append the "Leaderboards" button
+      this.game_over_container.appendChild(this.leaderboards_button);
+    }
+
+    // Assign click event to the leaderboards button to show the leaderboard
+    this.leaderboards_button.onclick = () => {
+      this.showLeaderboard();
+    };
 
     if (this.music) {
       this.music.pause();
