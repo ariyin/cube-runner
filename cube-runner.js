@@ -287,10 +287,6 @@ export class CubeRunner extends Base_Scene {
     // Reset spawn timing
     this.lastSpawnTime = performance.now()
 
-    // Any other resets needed (e.g., player health, game level)
-    // ...
-
-    // Optionally, refocus or click to start
   }
 
   showHighScoreEntry() {
@@ -387,7 +383,6 @@ export class CubeRunner extends Base_Scene {
     return { container, modal };
   }
 
-// Example placeholder for saving scores
   saveScore(name, score) {
     // Round the score to the nearest whole number before saving
     const roundedScore = Math.round(score);
@@ -426,10 +421,10 @@ export class CubeRunner extends Base_Scene {
 
       // Create the text element for the powerup indication
       this.powerUpText = document.createElement('div');
-      this.powerUpText.textContent = 'Activate Shield'; // The text to display
+      this.powerUpText.innerHTML = 'Activate   Shield'; // Use innerHTML to include HTML content
       this.powerUpText.style.position = 'absolute';
       this.powerUpText.style.bottom = '50px'; // Adjust based on your layout
-      this.powerUpText.style.left = '20px'; // Adjust based on your layout
+      this.powerUpText.style.left = '15px'; // Adjust based on your layout
 
       this.powerUpText.style.width = '100%';
       this.powerUpText.style.textAlign = 'center';
@@ -451,16 +446,14 @@ export class CubeRunner extends Base_Scene {
 
   }
 
-// Example placeholder for retrieving sorted leaderboard scores
   getLeaderboardScores() {
     // Return a sorted list of score objects {name: 'Player', score: 100}
-    return this.placeholderScores; // Assuming 'placeholderScores' holds your current leaderboard
+    return this.placeholderScores;
   }
 
 
   // Checks if the score qualifies as a high score
   isNewHighScore(currentScore) {
-    // Assuming 'placeholderScores' holds your current leaderboard
     // Check if the current score is higher than the lowest score in the leaderboard
     return this.placeholderScores.length < 10 || currentScore > this.placeholderScores[this.placeholderScores.length - 1].score;
   }
@@ -572,7 +565,6 @@ export class CubeRunner extends Base_Scene {
       this.play_again_button.textContent = 'Play Again'
       this.play_again_button.style.marginTop = '20px'
       // Set up styling as before
-      // Add any additional styles you need
       this.play_again_button.onclick = () => {
         this.resetGame()
       }
@@ -609,8 +601,6 @@ export class CubeRunner extends Base_Scene {
         document.createElement('button')
       this.exit_to_main_menu_button.textContent =
         'Main Menu'
-      // Set up styling as before
-      // Add any additional styles you need
       this.exit_to_main_menu_button.onclick = () => {
         this.showMainMenu()
       }
