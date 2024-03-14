@@ -222,9 +222,12 @@ export class CubeRunner extends Base_Scene {
       { name: 'pandalover234', score: 4000 },
       { name: 'beatmel0ser', score: 3000 },
       { name: 'Nick', score: 2000 },
-      { name: 'Aneesh', score: 1000 },
+      { name: 'Aneesh', score: 500 },
     ]
 
+
+    this.hasShield = false; // Track if the player has collected a shield power-up
+    this.shieldActive = false; // Track if the shield is currently active
     this.shield_duration = 2.5
     this.shield_cube_chance = 0.03
     this.shield_activate_time = -this.shield_duration
@@ -269,6 +272,8 @@ export class CubeRunner extends Base_Scene {
     // Reset game state variables
     this.started = true // Allow the game to run
     this.current_score = 0 // Reset score
+    this.hasShield = false; // Make sure no shield is available upon reset
+    this.updatePowerUpDisplay(); // Update the power-up display
     this.high_score = this.high_score // Keep high score, or reset if you prefer
     this.spawnedCubes = [] // Clear existing cubes
     this.horizontal_position = 0 // Reset player position
@@ -400,6 +405,51 @@ export class CubeRunner extends Base_Scene {
     // the next call to showLeaderboard will automatically display the updated scores.
   }
 
+  updatePowerUpDisplay() {
+    if (!this.powerUpContainer) {
+      // Create the container for the power-up display if it doesn't already exist
+      this.powerUpContainer = document.createElement('div');
+      this.powerUpContainer.style.position = 'absolute';
+      this.powerUpContainer.style.left = '240px'; // Position at the bottom-left corner
+      this.powerUpContainer.style.bottom = '190px';
+      this.powerUpContainer.style.width = '50px'; // Adjust size as needed
+      this.powerUpContainer.style.height = '50px';
+      document.body.appendChild(this.powerUpContainer);
+
+      // Create the image element for the shield icon
+      this.shieldIcon = document.createElement('img');
+      this.shieldIcon.src = 'assets/shield.png'; // Use the specified path
+      this.shieldIcon.style.width = '200%'; // Make the icon fill the container
+      this.shieldIcon.style.height = '200%';
+      this.shieldIcon.style.display = 'none'; // Initially hidden
+      this.powerUpContainer.appendChild(this.shieldIcon);
+
+      // Create the text element for the powerup indication
+      this.powerUpText = document.createElement('div');
+      this.powerUpText.textContent = 'Activate Shield'; // The text to display
+      this.powerUpText.style.position = 'absolute';
+      this.powerUpText.style.bottom = '50px'; // Adjust based on your layout
+      this.powerUpText.style.left = '20px'; // Adjust based on your layout
+
+      this.powerUpText.style.width = '100%';
+      this.powerUpText.style.textAlign = 'center';
+      this.powerUpText.style.color = 'red'; // Adjust based on your theme
+      this.powerUpText.style.display = 'none'; // Initially hidden
+      this.powerUpContainer.appendChild(this.powerUpText);
+    }
+
+    // Ensure the power-up display responds to game state changes
+    if (!this.started || this.game_over) {
+      // Hide the power-up display when the game is not running or is over
+      this.powerUpContainer.style.display = 'none';
+    } else {
+      // Only show the power-up display if the game is running and the player has a shield
+      this.powerUpContainer.style.display = this.hasShield ? 'block' : 'none';
+      this.shieldIcon.style.display = this.hasShield ? 'block' : 'none';
+      this.powerUpText.style.display = this.hasShield ? 'block' : 'none';
+    }
+
+  }
 
 // Example placeholder for retrieving sorted leaderboard scores
   getLeaderboardScores() {
@@ -671,6 +721,16 @@ export class CubeRunner extends Base_Scene {
         this.play_music = !this.play_music
       }
     )
+
+    this.key_triggered_button("Activate Shield", [" "], () => {
+      if (this.hasShield && !this.shieldActive) {
+        this.shieldActive = true;
+        this.shield_activate_time = performance.now() / 1000; // Current time in seconds
+        this.hasShield = false; // Use up the shield power-up
+        this.updatePowerUpDisplay(); // Ensure the UI is updated
+
+      }
+    });
   }
 
   display(context, program_state) {
@@ -975,30 +1035,20 @@ export class CubeRunner extends Base_Scene {
           z: cube.positionZ,
         }
 
-        if (
-          this.isColliding(
-            playerPos,
-            cubePos,
-            this.cubeSize / 2
-          )
-        ) {
-          if (!cube.isShield) {
-            if (
-              t >
-              this.shield_activate_time +
-                this.shield_duration
-            ) {
-              // Assuming the cubeSize refers to the full side length; we want radius
-              this.started = false // Stop the game
-              // Optionally, perform any cleanup or display a game over message
-              this.showGameOverScreen() // Show game over screen instead of the alert
-              return // Exit the loop to avoid further processing
-            }
-          } else {
-            this.shield_activate_time = t
-            cube.isActive = false
+        // Inside the spawnedCubes.forEach loop in the display method
+        if (this.isColliding(playerPos, cubePos, this.cubeSize / 2)) {
+          if (cube.isShield) {
+            this.hasShield = true; // Store the shield power-up
+            cube.isActive = false; // Remove the cube from the game
+            this.updatePowerUpDisplay(); // Update the power-up display
+          } else if (!this.shieldActive) { // Only end the game if the shield is not active
+            this.started = false; // Stop the game
+            this.showGameOverScreen(); // Show game over screen
+            this.updatePowerUpDisplay(); // Update the power-up display
+            return; // Exit the loop to avoid further processing
           }
         }
+
       })
 
       this.spawnedCubes.forEach((cube) => {
@@ -1184,22 +1234,20 @@ export class CubeRunner extends Base_Scene {
         )
       }
 
-      if (
-        t <
-        this.shield_activate_time + this.shield_duration
-      ) {
+      if (this.shieldActive && (performance.now() / 1000) < (this.shield_activate_time + this.shield_duration)) {
         this.shapes.shield.draw(
-          context,
-          program_state,
-          Mat4.identity()
-            .times(
-              Mat4.rotation(-this.tilt_angle * 5, 0, 0, 1)
-            )
-            .times(Mat4.translation(0, 0, 12, 0))
-            .times(Mat4.scale(1.4, 1.4, 1.4)),
-          this.materials.shield
-        )
+            context,
+            program_state,
+            Mat4.identity()
+                .times(Mat4.rotation(-this.tilt_angle * 5, 0, 0, 1))
+                .times(Mat4.translation(0, 0, 12, 0))
+                .times(Mat4.scale(1.4, 1.4, 1.4)),
+            this.materials.shield
+        );
+      } else {
+        this.shieldActive = false; // Deactivate the shield once the duration expires
       }
+
 
       // Update and render score
       if (!this.is_paused) {
