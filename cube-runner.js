@@ -288,92 +288,137 @@ export class CubeRunner extends Base_Scene {
     // Optionally, refocus or click to start
   }
 
-  showLeaderboard() {
-    // Ensure the leaderboard container exists
-    if (!this.leaderboard_container) {
-      this.leaderboard_container =
-        document.createElement('div')
-      // Styling for the modal background
-      this.leaderboard_container.style.position = 'fixed' // Use fixed to keep it in place during scrolling
-      this.leaderboard_container.style.left = '50%'
-      this.leaderboard_container.style.top = '50%'
-      this.leaderboard_container.style.transform =
-        'translate(-50%, -50%)'
-      this.leaderboard_container.style.width = '80%' // Or any specific size
-      this.leaderboard_container.style.maxWidth = '600px' // Maximum size
-      this.leaderboard_container.style.background =
-        'rgba(0, 0, 0, 0.8)'
-      this.leaderboard_container.style.color = 'white'
-      this.leaderboard_container.style.textAlign = 'center'
-      this.leaderboard_container.style.padding = '20px'
-      this.leaderboard_container.style.borderRadius = '10px'
-      this.leaderboard_container.style.boxShadow =
-        '0 4px 8px rgba(0, 0, 0, 0.2)'
-      this.leaderboard_container.style.zIndex = '1001' // Ensure it appears on top
-      document.body.appendChild(this.leaderboard_container)
-    }
+  showHighScoreEntry() {
+    const overlay = this.createOverlay();
 
-    // Clear previous content
-    this.leaderboard_container.innerHTML =
-      '<h2>Leaderboard</h2>'
+    const title = document.createElement('h2');
+    title.textContent = 'Congratulations!';
+    overlay.modal.appendChild(title);
 
-    if (
-      this.current_score >
-      this.placeholderScores[
-        this.placeholderScores.length - 1
-      ].score
-    ) {
-      const userName = prompt(
-        'New High Score! Enter your name:'
-      )
-      if (!userName) return // User cancelled the prompt
+    const scoreDisplay = document.createElement('p');
+    scoreDisplay.textContent = `You scored ${Math.round(this.current_score)} points! Enter your name:`;
+    overlay.modal.appendChild(scoreDisplay);
 
-      // Assuming 'placeholderScores' is accessible globally or within this context
-      this.placeholderScores.push({
-        name: userName,
-        score: Math.round(this.current_score),
-      })
-      // Sort the scores in descending order
-      this.placeholderScores.sort(
-        (a, b) => b.score - a.score
-      )
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.placeholder = 'Your Name Here';
+    overlay.modal.appendChild(nameInput);
 
-      this.placeholderScores.pop()
-    }
+    const submitButton = document.createElement('button');
+    submitButton.textContent = 'Submit';
+    submitButton.onclick = () => {
+      const userName = nameInput.value.trim();
+      if(userName) {
+        // Assuming a method to save the score
+        this.saveScore(userName, this.current_score);
+        document.body.removeChild(overlay.container);
+        this.showLeaderboard(); // Show the leaderboard after submitting
+      }
+    };
+    overlay.modal.appendChild(submitButton);
 
-    const scoreList = document.createElement('ul')
-    this.placeholderScores.forEach((entry, index) => {
-      const scoreItem = document.createElement('li')
-      scoreItem.textContent = `#${index + 1}: ${
-        entry.name
-      } - ${entry.score} points`
-      scoreList.appendChild(scoreItem)
-    })
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent = 'Cancel';
+    cancelButton.onclick = () => {
+      document.body.removeChild(overlay.container);
+    };
+    overlay.modal.appendChild(cancelButton);
 
-    this.leaderboard_container.appendChild(scoreList)
-
-    // Display the container
-    this.leaderboard_container.style.display = 'block'
-
-    // Optionally, add a button to close the leaderboard and return to the main menu or game over screen
-    const closeButton = document.createElement('button')
-    closeButton.textContent = 'Close'
-    closeButton.style.marginTop = '20px' // Style as needed
-    closeButton.onclick = () => {
-      this.leaderboard_container.style.display = 'none'
-    }
-    // Additional styling for the close button
-    closeButton.style.padding = '10px 20px'
-    closeButton.style.fontSize = '16px'
-    closeButton.style.backgroundColor = '#333'
-    closeButton.style.color = 'white'
-    closeButton.style.border = 'none'
-    closeButton.style.borderRadius = '5px'
-    closeButton.style.cursor = 'pointer'
-
-    this.leaderboard_container.appendChild(closeButton)
+    document.body.appendChild(overlay.container);
   }
 
+// Step 2: Display the Leaderboard
+  showLeaderboard() {
+    const overlay = this.createOverlay();
+    const title = document.createElement('h2');
+    title.textContent = 'Leaderboard';
+    overlay.modal.appendChild(title);
+
+    // Assuming you have a method to get sorted leaderboard scores
+    const scores = this.getLeaderboardScores();
+
+    const list = document.createElement('ol');
+    scores.forEach(score => {
+      const item = document.createElement('li');
+      item.textContent = `${score.name}: ${score.score}`;
+      list.appendChild(item);
+    });
+    overlay.modal.appendChild(list);
+
+    const closeButton = document.createElement('button');
+    closeButton.textContent = 'Close';
+    closeButton.onclick = () => {
+      document.body.removeChild(overlay.container);
+    };
+    overlay.modal.appendChild(closeButton);
+
+    document.body.appendChild(overlay.container);
+  }
+
+// Utility to create overlay and modal
+  createOverlay() {
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.left = 0;
+    container.style.top = 0;
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    container.style.display = 'flex';
+    container.style.justifyContent = 'center';
+    container.style.alignItems = 'center';
+    container.style.zIndex = '1000';
+
+    const modal = document.createElement('div');
+    modal.style.background = 'white';
+    modal.style.padding = '20px';
+    modal.style.borderRadius = '10px';
+    modal.style.textAlign = 'center';
+    modal.style.maxWidth = '600px';
+    modal.style.width = '80%';
+
+    container.appendChild(modal);
+
+    return { container, modal };
+  }
+
+// Example placeholder for saving scores
+  saveScore(name, score) {
+    // Round the score to the nearest whole number before saving
+    const roundedScore = Math.round(score);
+
+    // Add the new score
+    this.placeholderScores.push({ name, score: roundedScore - 1});
+
+    // Sort the scores in descending order
+    this.placeholderScores.sort((a, b) => b.score - a.score);
+
+    // Optional: Keep only the top 10 scores
+    this.placeholderScores = this.placeholderScores.slice(0, 10);
+
+    // Since we've modified the placeholderScores array directly,
+    // the next call to showLeaderboard will automatically display the updated scores.
+  }
+
+
+// Example placeholder for retrieving sorted leaderboard scores
+  getLeaderboardScores() {
+    // Return a sorted list of score objects {name: 'Player', score: 100}
+    return this.placeholderScores; // Assuming 'placeholderScores' holds your current leaderboard
+  }
+
+
+  // Checks if the score qualifies as a high score
+  isNewHighScore(currentScore) {
+    // Assuming 'placeholderScores' holds your current leaderboard
+    // Check if the current score is higher than the lowest score in the leaderboard
+    return this.placeholderScores.length < 10 || currentScore > this.placeholderScores[this.placeholderScores.length - 1].score;
+  }
+
+// Prompts user for their name if they got a high score
+  promptForHighScoreName() {
+    this.showHighScoreEntry();
+  }
   showGameOverScreen() {
     if (!this.game_over_container) {
       this.game_over_container =
@@ -464,6 +509,11 @@ export class CubeRunner extends Base_Scene {
     bestScoreText.style.fontSize = '24px' // Customize as needed
     bestScoreText.style.color = 'gold' // Customize as needed
     this.game_over_container.appendChild(bestScoreText)
+
+    // In your game over or score handling logic
+    if (this.isNewHighScore(this.current_score)) {
+      this.promptForHighScoreName();
+    }
 
     // Check if "Play Again" button already exists
     if (!this.play_again_button) {
