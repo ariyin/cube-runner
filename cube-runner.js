@@ -99,7 +99,7 @@ class Base_Scene extends Scene {
         '../assets/spaceship.obj'
       ),
       shield: new defs.Subdivision_Sphere(4),
-      outline: new Cube_Outline(hex_color('#ffffff')),
+      outline: new Cube_Outline(hex_color('#fdaf42')),
       green_outline: new Cube_Outline(hex_color('#00ff00')),
       floor: new Cube(),
       background: new defs.Grid_Patch(
@@ -225,7 +225,6 @@ export class CubeRunner extends Base_Scene {
       { name: 'Aneesh', score: 500 },
     ]
 
-
     this.hasShield = false; // Track if the player has collected a shield power-up
     this.shieldActive = false; // Track if the shield is currently active
     this.shield_duration = 2.5
@@ -286,49 +285,67 @@ export class CubeRunner extends Base_Scene {
 
     // Reset spawn timing
     this.lastSpawnTime = performance.now()
-
   }
 
   showHighScoreEntry() {
     const overlay = this.createOverlay();
 
     const title = document.createElement('h2');
-    title.textContent = 'Congratulations!';
+    title.textContent = 'CONGRATULATIONS!';
     overlay.modal.appendChild(title);
 
-    const scoreDisplay = document.createElement('p');
-    scoreDisplay.textContent = `You scored ${Math.round(this.current_score)} points! Enter your name:`;
+    const scoreDisplay = document.createElement('h3');
+    // scoreDisplay.fontSize = '18px';
+    scoreDisplay.textContent = `YOU SCORED ${Math.round(this.current_score)} POINTS! ENTER YOUR NAME:`;
     overlay.modal.appendChild(scoreDisplay);
 
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
-    nameInput.placeholder = 'Your Name Here';
+    nameInput.placeholder = 'YOUR NAME HERE';
+    nameInput.style.fontFamily = 'Shapiro';
+    nameInput.style.fontSize = '18px';
+    nameInput.style.padding = '15px 15px'
+    nameInput.style.border = '3px solid black'
+    nameInput.style.borderRadius = '30px'
+    nameInput.style.width = '300px';
     overlay.modal.appendChild(nameInput);
 
+    const submitStyle = `padding: 5px 15px; font-size: 16px; margin: 5px; background-color: #333; color: white; border: 3px solid #333; border-radius: 5px;`;
+    const cancelStyle = `padding: 5px 15px; font-size: 16px; margin: 5px; color: #333; border: 3px solid #333; border-radius: 5px;`;
+    
+    // Create a new div to contain the buttons
+    const buttonsDiv = document.createElement('div');
+    buttonsDiv.style.paddingTop = '25px';
+    
     const submitButton = document.createElement('button');
-    submitButton.textContent = 'Submit';
+    submitButton.textContent = 'SUBMIT';
+    submitButton.setAttribute('style', submitStyle);
     submitButton.onclick = () => {
       const userName = nameInput.value.trim();
-      if(userName) {
+      if (userName) {
         // Assuming a method to save the score
         this.saveScore(userName, this.current_score);
         document.body.removeChild(overlay.container);
         this.showLeaderboard(); // Show the leaderboard after submitting
       }
     };
-    overlay.modal.appendChild(submitButton);
-
+    buttonsDiv.appendChild(submitButton); // Append submit button to the div
+    
     const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Cancel';
+    cancelButton.textContent = 'CANCEL';
+    cancelButton.setAttribute('style', cancelStyle);
     cancelButton.onclick = () => {
       document.body.removeChild(overlay.container);
     };
-    overlay.modal.appendChild(cancelButton);
+    buttonsDiv.appendChild(cancelButton); // Append cancel button to the div
+    
+    overlay.modal.appendChild(buttonsDiv); // Append the div containing buttons to the overlay modal
+    
 
     document.body.appendChild(overlay.container);
   }
 
-// Step 2: Display the Leaderboard
+  // Step 2: Display the Leaderboard
   showLeaderboard() {
     const overlay = this.createOverlay();
     const title = document.createElement('h2');
@@ -346,8 +363,10 @@ export class CubeRunner extends Base_Scene {
     });
     overlay.modal.appendChild(list);
 
+    const closeStyle = `padding: 5px 15px; font-size: 16px; margin: 5px; background-color: #333; color: white; border: 3px solid #333; border-radius: 5px;`;
     const closeButton = document.createElement('button');
     closeButton.textContent = 'Close';
+    closeButton.setAttribute('style', closeStyle);
     closeButton.onclick = () => {
       document.body.removeChild(overlay.container);
     };
@@ -356,7 +375,7 @@ export class CubeRunner extends Base_Scene {
     document.body.appendChild(overlay.container);
   }
 
-// Utility to create overlay and modal
+  // Utility to create overlay and modal
   createOverlay() {
     const container = document.createElement('div');
     container.style.position = 'fixed';
@@ -405,11 +424,16 @@ export class CubeRunner extends Base_Scene {
       // Create the container for the power-up display if it doesn't already exist
       this.powerUpContainer = document.createElement('div');
       this.powerUpContainer.style.position = 'absolute';
-      this.powerUpContainer.style.left = '240px'; // Position at the bottom-left corner
-      this.powerUpContainer.style.bottom = '190px';
+      this.powerUpContainer.style.left = '20px'; // Position at the bottom-left corner
+      this.powerUpContainer.style.top = '475px';
       this.powerUpContainer.style.width = '50px'; // Adjust size as needed
       this.powerUpContainer.style.height = '50px';
-      document.body.appendChild(this.powerUpContainer);
+      // document.body.appendChild(this.powerUpContainer);
+
+      const canvasElement =
+        document.querySelector('#main-canvas') // Select the main canvas element
+      canvasElement.style.position = 'relative' // Ensure the canvas is positioned to anchor the score
+      canvasElement.appendChild(this.powerUpContainer)
 
       // Create the image element for the shield icon
       this.shieldIcon = document.createElement('img');
@@ -420,17 +444,17 @@ export class CubeRunner extends Base_Scene {
       this.powerUpContainer.appendChild(this.shieldIcon);
 
       // Create the text element for the powerup indication
-      this.powerUpText = document.createElement('div');
-      this.powerUpText.innerHTML = 'Activate   Shield'; // Use innerHTML to include HTML content
-      this.powerUpText.style.position = 'absolute';
-      this.powerUpText.style.bottom = '50px'; // Adjust based on your layout
-      this.powerUpText.style.left = '15px'; // Adjust based on your layout
+      // this.powerUpText = document.createElement('div');
+      // this.powerUpText.innerHTML = 'Activate   Shield'; // Use innerHTML to include HTML content
+      // this.powerUpText.style.position = 'absolute';
+      // this.powerUpText.style.bottom = '50px'; // Adjust based on your layout
+      // this.powerUpText.style.left = '15px'; // Adjust based on your layout
 
-      this.powerUpText.style.width = '100%';
-      this.powerUpText.style.textAlign = 'center';
-      this.powerUpText.style.color = 'red'; // Adjust based on your theme
-      this.powerUpText.style.display = 'none'; // Initially hidden
-      this.powerUpContainer.appendChild(this.powerUpText);
+      // this.powerUpText.style.width = '100%';
+      // this.powerUpText.style.textAlign = 'center';
+      // this.powerUpText.style.color = 'red'; // Adjust based on your theme
+      // this.powerUpText.style.display = 'none'; // Initially hidden
+      // this.powerUpContainer.appendChild(this.powerUpText);
     }
 
     // Ensure the power-up display responds to game state changes
@@ -441,7 +465,7 @@ export class CubeRunner extends Base_Scene {
       // Only show the power-up display if the game is running and the player has a shield
       this.powerUpContainer.style.display = this.hasShield ? 'block' : 'none';
       this.shieldIcon.style.display = this.hasShield ? 'block' : 'none';
-      this.powerUpText.style.display = this.hasShield ? 'block' : 'none';
+      // this.powerUpText.style.display = this.hasShield ? 'block' : 'none';
     }
 
   }
@@ -700,6 +724,15 @@ export class CubeRunner extends Base_Scene {
       }
     )
 
+    this.key_triggered_button("Activate Shield", [" "], () => {
+      if (this.hasShield && !this.shieldActive) {
+        this.shieldActive = true;
+        this.shield_activate_time = performance.now() / 1000; // Current time in seconds
+        this.hasShield = false; // Use up the shield power-up
+        this.updatePowerUpDisplay(); // Ensure the UI is updated
+      }
+    });
+
     this.key_triggered_button('Pause', ['p'], () => {
       this.is_paused = !this.is_paused
     })
@@ -711,16 +744,6 @@ export class CubeRunner extends Base_Scene {
         this.play_music = !this.play_music
       }
     )
-
-    this.key_triggered_button("Activate Shield", [" "], () => {
-      if (this.hasShield && !this.shieldActive) {
-        this.shieldActive = true;
-        this.shield_activate_time = performance.now() / 1000; // Current time in seconds
-        this.hasShield = false; // Use up the shield power-up
-        this.updatePowerUpDisplay(); // Ensure the UI is updated
-
-      }
-    });
   }
 
   display(context, program_state) {
@@ -1276,7 +1299,6 @@ export class CubeRunner extends Base_Scene {
     this.current_score = 0 // Optionally reset the current score, or you might want to keep the score until a new game starts.
     // Reset the high score.
     this.high_score = 0
-    this.theme = 'Basic'
 
     // Hide any game-specific UI elements that should not be visible in the main menu.
     if (this.game_over_container) {
@@ -1302,6 +1324,8 @@ export class CubeRunner extends Base_Scene {
     if (this.themeImage) {
       this.themeImage.style.display = 'block'
     }
+    console.log(this.difficulty)
+    console.log(this.theme)
     if (this.music) {
       // this.music.src = 'audio/lastsurprise.mp3'
       this.music.pause()
