@@ -85,7 +85,6 @@ class Base_Scene extends Scene {
     super()
 
     const initial_corner_point = vec3(-31, -12.5, -50)
-    // const initial_corner_point = vec3(-31, -12.87, -50);
     const row_operation = (s, p) =>
       p
         ? Mat4.translation(0, 0.3, 0).times(p.to4(1)).to3()
@@ -177,7 +176,7 @@ export class CubeRunner extends Base_Scene {
     this.high_score = 0
     this.is_paused = false
     this.play_music = true
-    this.theme = 'Basic' // basic, synthwave, sky
+    this.theme = 'Basic'
 
     // User
     this.left_key_pressed = false
@@ -295,7 +294,6 @@ export class CubeRunner extends Base_Scene {
     overlay.modal.appendChild(title);
 
     const scoreDisplay = document.createElement('h3');
-    // scoreDisplay.fontSize = '18px';
     scoreDisplay.textContent = `YOU SCORED ${Math.round(this.current_score)} POINTS! ENTER YOUR NAME:`;
     overlay.modal.appendChild(scoreDisplay);
 
@@ -426,7 +424,6 @@ export class CubeRunner extends Base_Scene {
       this.powerUpContainer.style.top = '475px';
       this.powerUpContainer.style.width = '50px'; // Adjust size as needed
       this.powerUpContainer.style.height = '50px';
-      // document.body.appendChild(this.powerUpContainer);
 
       const canvasElement =
         document.querySelector('#main-canvas') // Select the main canvas element
@@ -1023,7 +1020,7 @@ export class CubeRunner extends Base_Scene {
         let playerPos = {
           x: 0,
           z: 10,
-        } // Z is always 0 since we're assuming it's a fixed lane
+        } // Z is always 10 since we're assuming it's a fixed lane
 
         let cubePos = {
           x: cube.positionX - this.horizontal_position,
