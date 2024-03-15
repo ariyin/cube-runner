@@ -338,10 +338,8 @@ export class CubeRunner extends Base_Scene {
       document.body.removeChild(overlay.container);
     };
     buttonsDiv.appendChild(cancelButton); // Append cancel button to the div
-    
+  
     overlay.modal.appendChild(buttonsDiv); // Append the div containing buttons to the overlay modal
-    
-
     document.body.appendChild(overlay.container);
   }
 
@@ -442,19 +440,6 @@ export class CubeRunner extends Base_Scene {
       this.shieldIcon.style.height = '200%';
       this.shieldIcon.style.display = 'none'; // Initially hidden
       this.powerUpContainer.appendChild(this.shieldIcon);
-
-      // Create the text element for the powerup indication
-      // this.powerUpText = document.createElement('div');
-      // this.powerUpText.innerHTML = 'Activate   Shield'; // Use innerHTML to include HTML content
-      // this.powerUpText.style.position = 'absolute';
-      // this.powerUpText.style.bottom = '50px'; // Adjust based on your layout
-      // this.powerUpText.style.left = '15px'; // Adjust based on your layout
-
-      // this.powerUpText.style.width = '100%';
-      // this.powerUpText.style.textAlign = 'center';
-      // this.powerUpText.style.color = 'red'; // Adjust based on your theme
-      // this.powerUpText.style.display = 'none'; // Initially hidden
-      // this.powerUpContainer.appendChild(this.powerUpText);
     }
 
     // Ensure the power-up display responds to game state changes
@@ -465,9 +450,7 @@ export class CubeRunner extends Base_Scene {
       // Only show the power-up display if the game is running and the player has a shield
       this.powerUpContainer.style.display = this.hasShield ? 'block' : 'none';
       this.shieldIcon.style.display = this.hasShield ? 'block' : 'none';
-      // this.powerUpText.style.display = this.hasShield ? 'block' : 'none';
     }
-
   }
 
   getLeaderboardScores() {
@@ -482,7 +465,7 @@ export class CubeRunner extends Base_Scene {
     return this.placeholderScores.length < 10 || currentScore > this.placeholderScores[this.placeholderScores.length - 1].score;
   }
 
-// Prompts user for their name if they got a high score
+  // Prompts user for their name if they got a high score
   promptForHighScoreName() {
     this.showHighScoreEntry();
   }
@@ -1011,7 +994,6 @@ export class CubeRunner extends Base_Scene {
         this.themeImage.style.display = 'none'
       }
 
-      let t = program_state.animation_time / 1000
       let dt = program_state.animation_delta_time / 1000
 
       if (this.is_paused) {
@@ -1037,7 +1019,7 @@ export class CubeRunner extends Base_Scene {
         })
       }
 
-      this.spawnedCubes.forEach((cube, index) => {
+      this.spawnedCubes.forEach((cube) => {
         let playerPos = {
           x: 0,
           z: 10,
@@ -1061,7 +1043,6 @@ export class CubeRunner extends Base_Scene {
             return; // Exit the loop to avoid further processing
           }
         }
-
       })
 
       this.spawnedCubes.forEach((cube) => {
@@ -1261,7 +1242,6 @@ export class CubeRunner extends Base_Scene {
         this.shieldActive = false; // Deactivate the shield once the duration expires
       }
 
-
       // Update and render score
       if (!this.is_paused) {
         this.update_score(
@@ -1324,8 +1304,7 @@ export class CubeRunner extends Base_Scene {
     if (this.themeImage) {
       this.themeImage.style.display = 'block'
     }
-    console.log(this.difficulty)
-    console.log(this.theme)
+
     if (this.music) {
       // this.music.src = 'audio/lastsurprise.mp3'
       this.music.pause()
