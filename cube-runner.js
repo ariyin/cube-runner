@@ -759,7 +759,7 @@ export class CubeRunner extends Base_Scene {
         this.start_title.textContent = 'CUBE RUNNER'
         this.start_title.style.color = 'white'
         this.start_title.style.position = 'absolute'
-        this.start_title.style.top = '10%'
+        this.start_title.style.top = '20%'
         this.start_title.style.left = '50%'
         this.start_title.style.transform =
           'translate(-50%, -50%)'
@@ -771,7 +771,7 @@ export class CubeRunner extends Base_Scene {
         this.start_button = document.createElement('button')
         this.start_button.textContent = 'Play'
         this.start_button.style.position = 'absolute'
-        this.start_button.style.top = '50%'
+        this.start_button.style.top = '75%'
         this.start_button.style.left = '50%'
         this.start_button.style.transform =
           'translate(-50%, -50%)'
@@ -799,7 +799,7 @@ export class CubeRunner extends Base_Scene {
         this.difficultyContainer.style.justifyContent =
           'center'
         this.difficultyContainer.style.position = 'absolute'
-        this.difficultyContainer.style.top = '40%'
+        this.difficultyContainer.style.top = '62%'
         this.difficultyContainer.style.left = '50%'
         this.difficultyContainer.style.transform =
           'translate(-50%, -50%)'
@@ -871,7 +871,7 @@ export class CubeRunner extends Base_Scene {
       if (!this.themeImagesAdded) {
         this.themeImage = document.createElement('img')
         this.themeImage.style.position = 'absolute'
-        this.themeImage.style.top = '24%'
+        this.themeImage.style.top = '38%'
         this.themeImage.style.left = '50%'
         this.themeImage.style.transform =
           'translate(-50%, -50%)'
@@ -890,7 +890,7 @@ export class CubeRunner extends Base_Scene {
         this.themeContainer.style.display = 'flex'
         this.themeContainer.style.justifyContent = 'center'
         this.themeContainer.style.position = 'absolute'
-        this.themeContainer.style.top = '35%'
+        this.themeContainer.style.top = '55%'
         this.themeContainer.style.left = '50%'
         this.themeContainer.style.transform =
           'translate(-50%, -50%)'
