@@ -95,7 +95,7 @@ class Base_Scene extends Scene {
     this.shapes = {
       cube: new Cube(),
       spaceship: new Shape_From_File(
-        '../assets/spaceship.obj'
+        'assets/spaceship.obj'
       ),
       shield: new defs.Subdivision_Sphere(4),
       outline: new Cube_Outline(hex_color('#fdaf42')),
@@ -471,7 +471,7 @@ export class CubeRunner extends Base_Scene {
       this.game_over_container =
         document.createElement('div')
       this.game_over_container.style.position = 'absolute'
-      this.game_over_container.style.top = '30%'
+      this.game_over_container.style.top = '50%'
       this.game_over_container.style.left = '50%'
       this.game_over_container.style.transform =
         'translate(-50%, -50%)'
